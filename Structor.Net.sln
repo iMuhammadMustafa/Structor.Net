@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structor.Net.Core", "Structor.Net.Core\Structor.Net.Core.csproj", "{D889128D-83EE-4D35-A781-67A3AB8EDAAF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Structor.Net", "Structor.Net.Core\Structor.Net.csproj", "{D889128D-83EE-4D35-A781-67A3AB8EDAAF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

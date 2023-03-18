@@ -11,19 +11,19 @@ This projects follows clean architecture and vertical slice architecture.
 
 ![ProjectStructure](ProjectStructure.png)
 
-1. [Core Project](#core-project)
-2. [Infrastructure Project](#infrastructure-project)
+1. [Core](#core)
+2. [Infrastructure](#infrastructure)
 3. [Features](#features)
 4. [Database](#database)
 
-###  Core Project
+###  Core
 This will be the entry point to the project bootstrapping and holding everything together. 
 
 New Modules will: 
 1. Add their services to the `ServiceCollectionExtension's AddModulesServices` method
 2. Add their entities and domain models to the `DbContext` class as `DbSet`
 
-### Infrastructure Project
+### Infrastructure
 This will contain shared services across the application.
 
 ### Features 
