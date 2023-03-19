@@ -42,11 +42,10 @@
 
   <ItemGroup>
     <Folder Include="Core\Helpers\" />
-    <Folder Include="Features\FeatureTemplate\NewFolder - Copy %282%29\" />
-    <Folder Include="Features\FeatureTemplate\NewFolder - Copy %283%29\" />
-    <Folder Include="Features\FeatureTemplate\NewFolder - Copy %284%29\" />
-    <Folder Include="Features\FeatureTemplate\NewFolder - Copy\" />
-    <Folder Include="Features\FeatureTemplate\NewFolder\" />
+    <Folder Include="Features\FeatureTemplate\Repositories\" />
+    <Folder Include="Features\FeatureTemplate\Services\" />
+    <Folder Include="Features\FeatureTemplate\Entities\" />
+    <Folder Include="Features\FeatureTemplate\DTOs\" />
     <Folder Include="Infrastructure\DTOs\" />
     <Folder Include="Infrastructure\Services\" />
   </ItemGroup>
