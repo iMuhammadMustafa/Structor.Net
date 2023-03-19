@@ -42,9 +42,13 @@
 
   <ItemGroup>
     <Folder Include="Core\Helpers\" />
+    <Folder Include="Features\FeatureTemplate\NewFolder - Copy %282%29\" />
+    <Folder Include="Features\FeatureTemplate\NewFolder - Copy %283%29\" />
+    <Folder Include="Features\FeatureTemplate\NewFolder - Copy %284%29\" />
+    <Folder Include="Features\FeatureTemplate\NewFolder - Copy\" />
+    <Folder Include="Features\FeatureTemplate\NewFolder\" />
     <Folder Include="Infrastructure\DTOs\" />
     <Folder Include="Infrastructure\Services\" />
-    <Folder Include="Features\" />
   </ItemGroup>
 
 </Project>

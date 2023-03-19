@@ -5,8 +5,7 @@ public static class CoreAppCollection
 
     public static WebApplication UseCoreApp(this WebApplication app)
     {
-
-        app.UseModulesServices();
+        app.UseFeaturesServices();
         app.UseSwagger();
         app.UseSwaggerUI();
 
@@ -15,16 +14,13 @@ public static class CoreAppCollection
         }
 
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
         app.MapControllers();
-
 
         return app;
     }
 
-    public static WebApplication UseModulesServices(this WebApplication app)
+    public static WebApplication UseFeaturesServices(this WebApplication app)
     {
 
         return app;

@@ -1,4 +1,7 @@
-﻿using Structor.Net.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore;
+using Structor.Net.Core.DatabaseContext;
+using Structor.Net.Core.Globals;
+using Structor.Net.Infrastructure;
 
 namespace Structor.Net.Core;
 
@@ -15,15 +18,14 @@ public static class CoreServicesCollection
         });
 
 
-        services.AddModulesServices();
+        services.AddInfrastructureServices();
+        services.AddFeaturessServices();
         return services;
     }
 
 
-    public static IServiceCollection AddModulesServices(this IServiceCollection services)
+    public static IServiceCollection AddFeaturessServices(this IServiceCollection services)
     {
-        services.AddInfrastructureServices();
-
         return services;
     }
 
