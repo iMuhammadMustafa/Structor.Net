@@ -2,7 +2,7 @@
 
 namespace Structor.Net.Core.Extentions;
 
-public static class IQueryableExtentions
+public static class IQueryableExtension
 {
     public static IQueryable<TEntity> Paginate<TEntity>(this IQueryable<TEntity> queryable, int pageNumber, int pageSize)
     {
