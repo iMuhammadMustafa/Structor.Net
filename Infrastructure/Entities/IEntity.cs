@@ -3,7 +3,7 @@
 public class IEntity
 {
     public int Id { get; set; }
-    public Guid? Guid { get; set; }
+    public Guid Guid { get; set; } = Guid.NewGuid();
 
     public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
 

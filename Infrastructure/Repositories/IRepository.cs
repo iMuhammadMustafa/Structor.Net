@@ -14,9 +14,9 @@ public interface IRepository<TEntity> where TEntity : IEntity
     Task<int> GetCount();
     Task<int> GetCountWhere(Expression<Func<TEntity, bool>> expression);
 
-    Task<TEntity> Insert(TEntity entity, bool? saveChanges = false);
-    Task<bool> Update(TEntity entity, bool? saveChanges = false);
-    Task<bool> Delete(TEntity entity, bool? saveChanges = false);
+    Task<TEntity> Insert(TEntity entity, bool saveChanges = false);
+    Task<bool> Update(TEntity entity, bool saveChanges = false);
+    Task<bool> Delete(TEntity entity, bool saveChanges = false);
 
     Task<bool> SaveChanges();
     Task Dispose();

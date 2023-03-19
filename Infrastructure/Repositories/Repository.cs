@@ -55,7 +55,7 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
     public virtual async Task<int> GetCountWhere(Expression<Func<TEntity, bool>> expression) => await DbSet.Where(expression).CountAsync();
 
 
-    public virtual async Task<TEntity> Insert(TEntity entity, bool? saveChanges = false)
+    public virtual async Task<TEntity> Insert(TEntity entity, bool saveChanges = false)
     {
         var dbEntity = await DbSet.AddAsync(entity);
         if (saveChanges == true)
@@ -64,7 +64,7 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
         }
         return dbEntity.Entity;
     }
-    public virtual async Task<bool> Update(TEntity entity, bool? saveChanges = false)
+    public virtual async Task<bool> Update(TEntity entity, bool saveChanges = false)
     {
         var entry = DbSet.Attach(entity);
         entry.State = EntityState.Modified;
@@ -73,7 +73,7 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
 
         return true;
     }
-    public virtual async Task<bool> Delete(TEntity entity, bool? saveChanges = false)
+    public virtual async Task<bool> Delete(TEntity entity, bool saveChanges = false)
     {
         DbSet.Attach(entity);
         _context.Remove(entity);
