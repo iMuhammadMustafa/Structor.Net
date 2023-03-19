@@ -7,7 +7,7 @@ My aim is to make this modular and to follow best practices as much as possible.
 ---
 
 ## Project Structure 
-This projects follows clean architecture and vertical slice architecture. 
+This projects try to follow  clean architecture and vertical slice architecture. 
 
 ![ProjectStructure](ProjectStructure.png)
 
@@ -18,23 +18,47 @@ This projects follows clean architecture and vertical slice architecture.
 
 ###  Core
 This will be the entry point to the project bootstrapping and holding everything together. 
+It contains: 
 
-New Modules will: 
-1. Add their services to the `CoreServicesCollection's AddModulesServices` method
-2. Add their entities and domain models to the `DbContext` class as `DbSet`
+    a. Extensions => Where global extension methods are added (ie: IQueryableExtension.cs).
+    b. Globals => Global and AppSettings consts.
+    c. Helpers => Helper classes. 
+    e. Setups => Adding global settings (ie: Testing Settings).
+    f. CoreServicesCollection => Where services are to be registered.  
+    g. CoreAppCollection => Where App usings and middlewares are to be registered.
 
-CoreDbContext is instaciated with the QueryTrackingBehavior NoTracking. This greatly improves performance and it means on implementing an update method you must first reattach the entity to the context
-Other Application DbContext could follow the same pattern by setting either .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking) or set it up in the constructor _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking
-Or keep the default behavior. 
 
 ### Infrastructure
 This will contain shared services across the application.
+It contains: 
+
+    a. DatabaseContext => For global context `CoreDbContext` 
+        CoreDbContext is created as a partial class so that features could extend it with their own entities without leaving the feature folder.
+    b. DTOs => Base DTO and Global DTOs that are shared between features. (ie: ResponseDTO)
+    c. Entities => Base Entity and Global Entities that are shared between features. (ie: IEntity)
+    e. Repositories => Base abstract Repository and IRepository and Project's Unit of work (if it were to be implemented). Other Repositories would inherit the functionality of the base repository.
+    f. Services => Services that are shared between Repositories.
+    g. InfrastructureServicesCollection => Where infrastructure services are to be registered.  
+
+
+Note: 
+* CoreDbContext is instantiated with the QueryTrackingBehavior NoTracking. 
+This greatly improves performance but on implementing a dbset update method you must first reattach the entity to the context (which base Repository already does with its update).
+* Added DbContexts could: 
+    1. Follow the same pattern by setting either .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+    2. Set it up in the constructor _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking.
+    3. Keep the default behavior. 
 
 ### Features 
 1. Each feature consists of multiple domains 
 ![Feature](Feature.png)
 2. Each domain starts with an entity and the Repository and Services class for that Entity and a Controller if it needs one.
 ![Domain](Domain.png)
+
+###### New Modules/Features will: 
+1. Register their services in `<Feature>ServicesCollection`.
+2. Register their services collection to the `CoreServicesCollection's AddFeaturessServices`.
+3. Add their entities and domain models to the `<Feature>DbContextExtension` `DbContext` partial class as `DbSet` or implments its own context and register it. 
 3. Each feature contains its own unit tests next to the class it tests. This might be frowned upon because the build will include the tests on production but I found a clever way to avoid this: 
     - In csproj I added the following: 
 	```
@@ -57,4 +81,4 @@ This will contain shared services across the application.
 	The above ensures that in the Release configuration all the files named *.Tests.cs are excluded from compilation, and also that the required unit testing package references are removed.
 
 ### Database
-Each Module will interact with the database using the Entity Framework DBContext either the main application context or a seperate context for that Feature
+Each Module will interact with the database using the Entity Framework's DBContext either the main application context or a seperate context for that Feature
