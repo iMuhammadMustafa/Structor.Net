@@ -82,3 +82,6 @@ This greatly improves performance but on implementing a dbset update method you 
 
 ### Database
 Each Module will interact with the database using the Entity Framework's DBContext either the main application context or a seperate context for that Feature
+
+
+### Design Choices

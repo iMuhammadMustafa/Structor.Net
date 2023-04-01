@@ -46,7 +46,6 @@
     <Folder Include="Features\FeatureTemplate\Services\" />
     <Folder Include="Features\FeatureTemplate\Entities\" />
     <Folder Include="Features\FeatureTemplate\DTOs\" />
-    <Folder Include="Infrastructure\DTOs\" />
     <Folder Include="Infrastructure\Services\" />
   </ItemGroup>
 
