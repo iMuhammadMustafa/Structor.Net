@@ -51,8 +51,11 @@ This greatly improves performance but on implementing a dbset update method you 
 
 ### Features 
 1. Each feature consists of multiple domains 
+
 ![Feature](Feature.png)
+
 2. Each domain starts with an entity and the Repository and Services class for that Entity and a Controller if it needs one.
+
 ![Domain](Domain.png)
 
 ###### New Modules/Features will: 
