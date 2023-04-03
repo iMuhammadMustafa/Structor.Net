@@ -21,7 +21,13 @@ public class ValuesController : ControllerBase
         var res = new IResponse<Test>();
 
         res.WithData(test)
-            .WithSuccess();
+            .WithPagination(new IPagination
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                TotalPages = 10,
+                TotalCount = 10,
+            });
 
 
         return res;
@@ -34,12 +40,10 @@ public class ValuesController : ControllerBase
         {
             ID = id
         };
-        var res = new IResponse<Test>();
+        var res = new IResponse<Test>().WithData(test, 201);
 
-        res.WithError();
 
-        this.HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-
+        throw new DirectoryNotFoundException();
         return res;
     }
 
