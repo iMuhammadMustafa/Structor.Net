@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Structor.Net.Infrastructure.Entities;
 
-namespace Structor.Net.Core.Setup.Tests
+namespace Structor.Net.Core.Tests.Setup
 {
     public class SqliteDbContextSetupFixture<TContext> : IDisposable
         where TContext : DbContext

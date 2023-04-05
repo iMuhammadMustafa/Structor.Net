@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Structor.Net.Core.DatabaseContext;
 using Structor.Net.Core.Extentions;
-using Structor.Net.Core.Setup.Tests;
+using Structor.Net.Core.Tests.Setup;
 using Structor.Net.Infrastructure.Entities;
 using Xunit;
 
