@@ -1,52 +1,55 @@
-﻿using System.Runtime.CompilerServices;
+﻿namespace Structor.Net.Infrastructure.DTOs.REST;
 
-namespace Structor.Net.Infrastructure.DTOs.REST;
-
-public class IResponse<T> where T : class
+public class IResponse<T>
 {
     public T? Data { get; set; }
     public object? Error { get; set; }
     public int StatusCode { get; set; }
-    public string Status { get; set; } = string.Empty;
+    public ResponseStatus? Status { get; set; } = null;
     public string? Message { get; set; }
-
     public IPagination? Pagination { get; set; }
 
 
-    public IResponse<T> WithData(T data)
+    public IResponse<T> WithData(T data, int statusCode = 200)
     {
+        //this.Status = ResponseStatus.Success;
         this.Data = data;
+
+        this.StatusCode = statusCode;
         return this;
     }
-    public IResponse<T> WithSuccess()
+    public IResponse<T> WithError(object error, int statusCode = 500)
     {
-        this.Status = "Success";
-        return this;
-    }
-    public IResponse<T> WithFailure()
-    {
-        this.Status = "Failure";
-        return this;
-    }
-    public IResponse<T> WithError()
-    {
-        this.Error = new Exception("Hello World of Errors");
-        return this;
-    }
-    public IResponse<T> WithError(object error)
-    {
+        this.Status = ResponseStatus.Failure;
         this.Error = error;
+        this.StatusCode = statusCode;
         return this;
     }
-    public IResponse<T> WithPagination(IPagination? pagination)
+    public IResponse<T> WithPagination(IPagination pagination)
     {
         this.Pagination = pagination;
         return this;
     }
-
-
-
-
+    public IResponse<T?> WithMessage(string message)
+    {
+        this.Message = message;
+        return this;
+    }
+    public IResponse<T> WithStatusCode(int statusCode)
+    {
+        this.StatusCode = statusCode;
+        return this;
+    }
+    public IResponse<T> WithSuccess()
+    {
+        this.Status = ResponseStatus.Success;
+        return this;
+    }
+    public IResponse<T> WithFailure()
+    {
+        this.Status = ResponseStatus.Failure;
+        return this;
+    }
 }
 
 public class IPagination
@@ -84,6 +87,13 @@ public class IPagination
 
 
 }
+
+public enum ResponseStatus
+{
+    Success,
+    Failure
+}
+
 
 //public static class IResponseExtensions
 //{

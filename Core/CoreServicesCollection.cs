@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Structor.Net.Core.DatabaseContext;
-using Structor.Net.Core.Globals;
+﻿using Newtonsoft.Json.Converters;
 using Structor.Net.Infrastructure;
 
 namespace Structor.Net.Core;
@@ -10,7 +8,17 @@ public static class CoreServicesCollection
 
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllers()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            });
+        //options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+        //    .AddJsonOptions(options =>
+        //    {
+        //        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        //        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        //    });
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {

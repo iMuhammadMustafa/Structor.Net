@@ -28,6 +28,7 @@
 	</ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.4" />
@@ -42,6 +43,7 @@
 
   <ItemGroup>
     <Folder Include="Core\Helpers\" />
+    <Folder Include="Features\FeatureTemplate\Controllers\" />
     <Folder Include="Features\FeatureTemplate\Repositories\" />
     <Folder Include="Features\FeatureTemplate\Services\" />
     <Folder Include="Features\FeatureTemplate\Entities\" />

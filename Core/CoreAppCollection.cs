@@ -1,10 +1,14 @@
-﻿namespace Structor.Net.Core;
+﻿using Structor.Net.Core.Middlewares;
+
+namespace Structor.Net.Core;
 
 public static class CoreAppCollection
 {
 
     public static WebApplication UseCoreApp(this WebApplication app)
     {
+
+        app.UseMiddleware<GlobaExceptionsMiddleware>();
         app.UseFeaturesServices();
         app.UseSwagger();
         app.UseSwaggerUI();
