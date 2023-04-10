@@ -20,18 +20,18 @@ This projects try to follow  clean architecture and vertical slice architecture.
 This will be the entry point to the project bootstrapping and holding everything together. 
 It contains: 
 
-    a. Extensions => Where global extension methods are added (ie: IQueryableExtension.cs).
-    b. Globals => Global and AppSettings consts.
-    c. Helpers => Helper classes. 
-    e. Setups => Adding global settings (ie: Testing Settings).
-    f. CoreServicesCollection => Where services are to be registered.  
-    g. CoreAppCollection => Where App usings and middlewares are to be registered.
+    a. Globals => Global and AppSettings consts.
+    b. Helpers => Helper classes. 
+    c. Setups => Adding global settings (ie: Testing Settings).
+    d. CoreServicesCollection => Where services are to be registered.  
+    e. CoreAppCollection => Where App usings and middlewares are to be registered.
 
 
 ### Infrastructure
 This will contain shared services across the application.
 It contains: 
 
+    a. Extensions => Where global extension methods are added (ie: IQueryableExtension.cs).
     a. DatabaseContext => For global context `CoreDbContext` 
         CoreDbContext is created as a partial class so that features could extend it with their own entities without leaving the feature folder.
     b. DTOs => Base DTO and Global DTOs that are shared between features. (ie: ResponseDTO)

@@ -1,6 +1,6 @@
-﻿using Structor.Net.Core.Middlewares;
+﻿using Core.Middlewares;
 
-namespace Structor.Net.Core;
+namespace Core;
 
 public static class CoreAppCollection
 {

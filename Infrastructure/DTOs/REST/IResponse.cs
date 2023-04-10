@@ -1,4 +1,4 @@
-﻿namespace Structor.Net.Infrastructure.DTOs.REST;
+﻿namespace Infrastructure.DTOs.REST;
 
 public class IResponse<T>
 {
@@ -13,41 +13,41 @@ public class IResponse<T>
     public IResponse<T> WithData(T data, int statusCode = 200)
     {
         //this.Status = ResponseStatus.Success;
-        this.Data = data;
+        Data = data;
 
-        this.StatusCode = statusCode;
+        StatusCode = statusCode;
         return this;
     }
     public IResponse<T> WithError(object error, int statusCode = 500)
     {
-        this.Status = ResponseStatus.Failure;
-        this.Error = error;
-        this.StatusCode = statusCode;
+        Status = ResponseStatus.Failure;
+        Error = error;
+        StatusCode = statusCode;
         return this;
     }
     public IResponse<T> WithPagination(IPagination pagination)
     {
-        this.Pagination = pagination;
+        Pagination = pagination;
         return this;
     }
     public IResponse<T?> WithMessage(string message)
     {
-        this.Message = message;
+        Message = message;
         return this;
     }
     public IResponse<T> WithStatusCode(int statusCode)
     {
-        this.StatusCode = statusCode;
+        StatusCode = statusCode;
         return this;
     }
     public IResponse<T> WithSuccess()
     {
-        this.Status = ResponseStatus.Success;
+        Status = ResponseStatus.Success;
         return this;
     }
     public IResponse<T> WithFailure()
     {
-        this.Status = ResponseStatus.Failure;
+        Status = ResponseStatus.Failure;
         return this;
     }
 }

@@ -1,12 +1,15 @@
-﻿using Structor.Net.Core.DatabaseContext;
+﻿using Infrastructure.DatabaseContext;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Structor.Net.Infrastructure;
+namespace Infrastructure;
 public static class FeatureServicesCollection
 {
 
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration _configuration)
     {
-        services.AddDbContext<CoreDbContext>(options => options.UseSqlite(AppSettings._configuration[AppSettings.SqlLiteInMemoryConnection])
+        services.AddDbContext<CoreDbContext>(options => options.UseSqlite(_configuration["ConnectionStrings:SqlLiteInMemoryDatabase"])
                                                         .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
 

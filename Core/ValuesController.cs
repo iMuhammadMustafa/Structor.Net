@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Structor.Net.Infrastructure.DTOs.REST;
+﻿using Infrastructure.DTOs.REST;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace Structor.Net.Core;
+namespace Core;
 [Route("api/[controller]")]
 [ApiController]
 public class ValuesController : ControllerBase

@@ -1,7 +1,12 @@
-﻿using Microsoft.Data.Sqlite;
-using Structor.Net.Infrastructure.Entities;
+﻿using Infrastructure.DatabaseContext;
+using Infrastructure.Entities;
+using Infrastructure.Repositories;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Structor.Net.Core.Tests.Setup
+namespace Infrastructure.Setup.Tests
 {
     public class SqliteDbContextSetupFixture<TContext> : IDisposable
         where TContext : DbContext
@@ -40,7 +45,7 @@ namespace Structor.Net.Core.Tests.Setup
     public class DependencySetupFixture<TContext>
     where TContext : DbContext
     {
-        public string SqlLiteInMemoryConnection = AppSettings.SqlLiteInMemoryConnection;
+        public string SqlLiteInMemoryConnection = "ConnectionStrings:SqlLiteInMemoryDatabase";
         public ServiceProvider ServiceProvider { get; private set; }
         public ServiceCollection ServiceCollection { get; private set; }
 
@@ -77,7 +82,7 @@ namespace Structor.Net.Core.Tests.Setup
             //ServiceCollection.AddScoped<IRepo, Repo>();
             //ServiceCollection.AddScoped(typeof(IRepository<>), typeof(Repository<,>));
             //ServiceCollection.AddScoped(typeof(IRepository<>), typeof(Repository<TestEntity, CoreDbContext>));
-            //ServiceCollection.AddScoped(typeof(IRepository<TestEntity>), typeof(Repository<TestEntity, TContext>));
+            ServiceCollection.AddScoped(typeof(IRepository<TestEntity>), typeof(Repository<TestEntity, TContext>));
             //ServiceCollection.AddScoped<IRepository<TestEntity>, Repository<TestEntity, TContext>>();
             //    (typeof(IRepository<TestEntity>), typeof(Repository<TestEntity, TContext>));
 
@@ -88,7 +93,7 @@ namespace Structor.Net.Core.Tests.Setup
 }
 
 
-namespace Structor.Net.Core.DatabaseContext
+namespace Infrastructure.DatabaseContext
 {
     public partial class CoreDbContext : DbContext
     {

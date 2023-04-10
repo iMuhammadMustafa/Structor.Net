@@ -1,4 +1,4 @@
-﻿namespace Structor.Net.Core.Globals;
+﻿namespace Core.Globals;
 
 public class AppSettings
 {

@@ -1,9 +1,7 @@
 ﻿using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Structor.Net.Infrastructure.Entities;
+using Infrastructure.Entities;
 
-namespace Structor.Net.Infrastructure.Repositories;
+namespace Infrastructure.Repositories;
 
 public interface IRepository<TEntity> where TEntity : IEntity
 {

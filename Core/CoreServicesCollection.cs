@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Converters;
-using Structor.Net.Infrastructure;
 
-namespace Structor.Net.Core;
+namespace Core;
 
 public static class CoreServicesCollection
 {
@@ -26,8 +25,8 @@ public static class CoreServicesCollection
         });
 
 
-        services.AddInfrastructureServices();
-        services.AddFeaturessServices();
+        //services.AddInfrastructureServices();
+        //services.AddFeaturessServices();
         return services;
     }
 

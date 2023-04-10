@@ -1,12 +1,8 @@
-﻿using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Structor.Net.Core.DatabaseContext;
-using Structor.Net.Core.Extentions;
-using Structor.Net.Infrastructure.Entities;
 
-namespace Structor.Net.Infrastructure.Repositories;
+namespace Infrastructure.Repositories;
 
 public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
     where TEntity : IEntity
