@@ -7,7 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 AppSettings._configuration = builder.Configuration;
 
 
-builder.Services.AddCoreServices();
+builder.Services.AddCoreServices(builder.Configuration);
+
+
 
 var app = builder.Build();
 

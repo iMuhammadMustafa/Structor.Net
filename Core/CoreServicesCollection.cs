@@ -1,11 +1,13 @@
-﻿using Newtonsoft.Json.Converters;
+﻿using Infrastructure;
+using Newtonsoft.Json.Converters;
+using UsersFeature;
 
 namespace Core;
 
 public static class CoreServicesCollection
 {
 
-    public static IServiceCollection AddCoreServices(this IServiceCollection services)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers()
             .AddNewtonsoftJson(options =>
@@ -25,16 +27,31 @@ public static class CoreServicesCollection
         });
 
 
-        //services.AddInfrastructureServices();
-        //services.AddFeaturessServices();
+        services.AddInfrastructureServices(configuration);
+        services.AddFeaturesServices(configuration);
         return services;
     }
 
 
-    public static IServiceCollection AddFeaturessServices(this IServiceCollection services)
+    public static IServiceCollection AddFeaturesServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddUsersServices(configuration);
         return services;
     }
 
 
 }
+
+/*
+Core 
+	Middleware
+	Filters
+	
+Infrastructure
+	DbContext
+	Generic Repository
+	Notifications
+	Generic Exceptions
+	Response Model
+	Mapper
+*/

@@ -44,7 +44,6 @@ public class ValuesController : ControllerBase
 
 
         throw new DirectoryNotFoundException();
-        return res;
     }
 
 }

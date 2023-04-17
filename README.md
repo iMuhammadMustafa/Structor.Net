@@ -1,13 +1,13 @@
 # Structor.Net
 
-This is a starter project for a .NET application. 
+This is a starter project for a .NET WebApi application. 
 
 My aim is to make this modular and to follow best practices as much as possible. 
 
 ---
 
 ## Project Structure 
-This projects try to follow  clean architecture and vertical slice architecture. 
+This projects trys to follow clean architecture in a vertical slice sense. 
 
 ![ProjectStructure](ProjectStructure.png)
 
@@ -60,9 +60,9 @@ This greatly improves performance but on implementing a dbset update method you 
 
 ###### New Modules/Features will: 
 1. Register their services in `<Feature>ServicesCollection`.
-2. Register their services collection to the `CoreServicesCollection's AddFeaturessServices`.
+2. Register their services collection to the `CoreServicesCollection's AddFeaturesServices`.
 3. Add their entities and domain models to the `<Feature>DbContextExtension` `DbContext` partial class as `DbSet` or implments its own context and register it. 
-3. Each feature contains its own unit tests next to the class it tests. This might be frowned upon because the build will include the tests on production but I found a clever way to avoid this: 
+3. Each feature contains its own unit tests next to the class it tests. This might be frowned upon because the build will include the tests on production but I found a clever way on stackoverflow to avoid this: 
     - In csproj I added the following: 
 	```
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
