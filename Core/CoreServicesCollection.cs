@@ -1,8 +1,8 @@
-﻿using Infrastructure;
-using Newtonsoft.Json.Converters;
-using UsersFeature;
+﻿using Newtonsoft.Json.Converters;
+using Structor.Features.UserFeature;
+using Structor.Infrastructure;
 
-namespace Core;
+namespace Structor.Core;
 
 public static class CoreServicesCollection
 {
@@ -20,6 +20,7 @@ public static class CoreServicesCollection
         //        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         //        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         //    });
+
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {

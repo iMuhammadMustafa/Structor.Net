@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.DatabaseContext;
+namespace Structor.Infrastructure.DatabaseContext;
 public partial class CoreDbContext : DbContext
 {
     public CoreDbContext(DbContextOptions options) : base(options) { }

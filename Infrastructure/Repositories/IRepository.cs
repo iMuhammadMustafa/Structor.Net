@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
-using Infrastructure.Entities;
+using Structor.Infrastructure.Entities;
 
-namespace Infrastructure.Repositories;
+namespace Structor.Infrastructure.Repositories;
 
 public interface IRepository<TEntity> where TEntity : IEntity
 {

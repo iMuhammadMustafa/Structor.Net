@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Infrastructure.DatabaseContext;
-using Infrastructure.Repositories;
-using UserFeature.Entities;
+using Structor.Features.UserFeature.Entities;
+using Structor.Infrastructure.Repositories;
 
-namespace UsersFeature.Repositories;
+namespace Structor.Features.UserFeature.Repositories;
 public class UserRepository : Repository<User, CoreDbContext>, IUserRepository
 {
     public UserRepository(CoreDbContext coreDbContext) : base(coreDbContext) { }

@@ -4,9 +4,9 @@ using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Infrastructure.Entities;
+using Structor.Infrastructure.Entities;
 
-namespace UserFeature.Entities;
+namespace Structor.Features.UserFeature.Entities;
 public class User : IEntity
 {
     public string? UserName { get; set; }

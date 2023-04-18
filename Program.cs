@@ -1,5 +1,5 @@
-using Core;
-using Core.Globals;
+using Structor.Core;
+using Structor.Core.Globals;
 
 var builder = WebApplication.CreateBuilder(args);
 

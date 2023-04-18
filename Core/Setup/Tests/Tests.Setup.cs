@@ -1,12 +1,13 @@
 ﻿using Infrastructure.DatabaseContext;
-using Infrastructure.Entities;
-using Infrastructure.Repositories;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Structor.Infrastructure.DatabaseContext;
+using Structor.Infrastructure.Entities;
+using Structor.Infrastructure.Repositories;
 
-namespace Infrastructure.Setup.Tests
+namespace Structor.Core.Setup.Tests
 {
     public class SqliteDbContextSetupFixture<TContext> : IDisposable
         where TContext : DbContext
@@ -93,7 +94,7 @@ namespace Infrastructure.Setup.Tests
 }
 
 
-namespace Infrastructure.DatabaseContext
+namespace Structor.Infrastructure.DatabaseContext
 {
     public partial class CoreDbContext : DbContext
     {

@@ -1,11 +1,11 @@
-﻿using Infrastructure.DatabaseContext;
-using Infrastructure.Extentions;
-using Infrastructure.Setup.Tests;
+﻿using Structor.Infrastructure.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using Structor.Core.Setup.Tests;
+using Structor.Infrastructure.Extentions;
 using Xunit;
 
-namespace Infrastructure.Repositories;
+namespace Structor.Infrastructure.Repositories;
 
 public class Repository : IClassFixture<SqliteDbContextSetupFixture<CoreDbContext>>
 {

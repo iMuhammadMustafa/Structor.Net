@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Infrastructure.Extentions;
+namespace Structor.Infrastructure.Extentions;
 
 public static class IQueryableExtension
 {

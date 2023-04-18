@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
+using Structor.Infrastructure.Entities;
 
-namespace Infrastructure.Repositories;
+namespace Structor.Infrastructure.Repositories;
 
 public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
     where TEntity : IEntity

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UserFeature.Entities;
+using Structor.Features.UserFeature.Entities;
 
 namespace Infrastructure.DatabaseContext;
 public partial class CoreDbContext : DbContext

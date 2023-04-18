@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.DTOs.REST;
+﻿namespace Structor.Infrastructure.DTOs.REST;
 
 public class IResponse<T>
 {

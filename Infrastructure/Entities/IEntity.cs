@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Entities;
+﻿namespace Structor.Infrastructure.Entities;
 
 public class IEntity
 {

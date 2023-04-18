@@ -1,9 +1,9 @@
-﻿using Infrastructure.DTOs.REST;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Structor.Infrastructure.DTOs.REST;
 
-namespace Core.Middlewares;
+namespace Structor.Core.Middlewares;
 
 public class GlobaExceptionsMiddleware
 {
