@@ -1,0 +1,171 @@
++﻿////using System;
+//using Structor.Net.Core.DatabaseContext;
+//using Structor.Net.Core.Tests;
+//using Xunit;
+//namespace Structor.Net.Infrastructure.Temp;
+
+
+//public class RepositoryTest2 : IClassFixture<SqliteDbContextSetupFixture<CoreDbContext>>
+//{
+
+//    private CoreDbContext _context { get; set; }
+
+//    public RepositoryTest2(SqliteDbContextSetupFixture<CoreDbContext> sqliteDbContextSetupFixture)
+//    {
+//        _context = sqliteDbContextSetupFixture.CreateContextForSQLiteInMemory();
+//    }
+
+//    [Fact]
+//    public async Task ShouldAddItemToDBNoDeb()
+//    {
+
+//        var newEnt = new TestEntity()
+//        {
+//            Id = 1,
+//            Guid = Guid.NewGuid(),
+//            CreatedDate = DateTimeOffset.Now,
+//            UpdatedDate = DateTimeOffset.Now,
+//        };
+
+//        //var mock = new Mock<Repository<TestEntity, CoreDbContext>>(_context)
+//        //{
+//        //    CallBase = true  /* the "reuse non-abstract" part */
+//        //};
+//        //var mock = new Mock<Repo>(_context)
+//        //{
+//        //    CallBase = true  /* the "reuse non-abstract" part */
+//        //};
+//        //var repo = mock.Object;
+
+//        var repo = new Repo(_context);
+
+
+
+//        await repo.Insert(newEnt, true);
+
+
+//        var result = await repo.GetById(1);
+
+//        Assert.NotNull(result);
+//        Assert.Equal(newEnt.Id, result.Id);
+
+//    }
+//}
+
+
+
+
+//////public class RepositoryTest
+//////{
+//////    IConfigurationRoot _configuration = new ConfigurationBuilder()
+//////                            .SetBasePath(Directory.GetCurrentDirectory())
+//////                            .AddJsonFile("appsettings.json")
+//////                           .Build();
+//////    public string SqlLiteInMemoryConnection = AppSettings.SqlLiteInMemoryConnection;
+
+
+
+//////    private readonly CoreDbContext _context;
+
+//////    public RepositoryTest()
+//////    {
+//////        var _connection = new SqliteConnection($"Data Source={Guid.NewGuid()};Mode=Memory;");
+//////        _connection.Open();
+//////        var _options = new DbContextOptionsBuilder()
+//////                .UseSqlite(_connection)
+//////                .Options;
+
+//////        _context = new CoreDbContext(_options);
+//////        _context.Database.EnsureCreated();
+//////        //_context.Database.Migrate();
+//////    }
+
+//////    [Fact]
+//////    public async Task ShouldAddItemToDBNoDeb()
+//////    {
+
+//////        var newEnt = new TestEntity()
+//////        {
+//////            Id = 1,
+//////            Guid = Guid.NewGuid(),
+//////            CreatedDate = DateTimeOffset.Now,
+//////            UpdatedDate = DateTimeOffset.Now,
+//////        };
+
+//////        //var mock = new Mock<Repository<TestEntity, CoreDbContext>>(_context)
+//////        //{
+//////        //    CallBase = true  /* the "reuse non-abstract" part */
+//////        //};
+//////        //var mock = new Mock<Repo>(_context)
+//////        //{
+//////        //    CallBase = true  /* the "reuse non-abstract" part */
+//////        //};
+//////        //var repo = mock.Object;
+
+//////        var repo = new Repo(_context);
+
+
+
+//////        await repo.Insert(newEnt, true);
+
+
+//////        var result = await repo.GetById(1);
+
+//////        Assert.NotNull(result);
+//////        Assert.Equal(newEnt.Id, result.Id);
+
+//////    }
+//////}
+
+
+
+
+
+
+
+
++﻿//using Structor.Net.Core.DatabaseContext;
+//using Structor.Net.Core.Tests;
+//using Xunit;
+
+//namespace Structor.Net.Infrastructure.Temp;
+
+
+//public class RepositoryTest : IClassFixture<DependencySetupFixture<CoreDbContext>>
+//{
+//    private ServiceProvider _serviceProvide;
+
+//    public RepositoryTest(DependencySetupFixture<CoreDbContext> fixture)
+//    {
+//        _serviceProvide = fixture.ServiceProvider;
+//    }
+
+
+//    [Fact]
+//    public async Task ShouldAddItemToDB()
+//    {
+
+//        using (var scope = _serviceProvide.CreateScope())
+//        {
+//            var repo = scope.ServiceProvider.GetService<IRepo>();
+
+
+//            var newEnt = new TestEntity()
+//            {
+//                Id = 1,
+//                Guid = Guid.NewGuid(),
+//                CreatedDate = DateTimeOffset.Now,
+//                UpdatedDate = DateTimeOffset.Now,
+//            };
+
+
+
+//            await repo.Insert(newEnt, true);
+
+//            var result = await repo.GetById(1);
+
+//            Assert.NotNull(result);
+//            Assert.Equal(newEnt.Id, result.Id);
+//        }
+//    }
+//}
