@@ -7,16 +7,16 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["Structor.Net.Core/Structor.Net.Core.csproj", "Structor.Net.Core/"]
-RUN dotnet restore "Structor.Net.Core/Structor.Net.Core.csproj"
+COPY ["Structor/Structor.csproj", "Structor/"]
+RUN dotnet restore "Structor/Structor.csproj"
 COPY . .
-WORKDIR "/src/Structor.Net.Core"
-RUN dotnet build "Structor.Net.Core.csproj" -c Release -o /app/build
+WORKDIR "/src/Structor"
+RUN dotnet build "Structor.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Structor.Net.Core.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Structor.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Structor.Net.Core.dll"]
+ENTRYPOINT ["dotnet", "Structor.dll"]
