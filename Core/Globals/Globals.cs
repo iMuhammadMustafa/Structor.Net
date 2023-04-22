@@ -1,4 +1,4 @@
-﻿namespace Structor.Core.Globals;
+﻿namespace Core.Globals;
 
 public static class Globals
 {

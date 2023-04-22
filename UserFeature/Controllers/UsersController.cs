@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Infrastructure.DTOs.REST;
 using Microsoft.AspNetCore.Mvc;
-using Structor.Features.UserFeature.Entities;
-using Structor.Features.UserFeature.Repositories;
-using Structor.Infrastructure.DTOs.REST;
+using UserFeature.Entities;
+using UsersFeature.Repositories;
 
-namespace Structor.Features.UserFeature.Controllers;
+namespace UserFeature.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

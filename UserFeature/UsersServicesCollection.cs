@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Structor.Features.UserFeature.Repositories;
+using UsersFeature.Repositories;
 
-namespace Structor.Features.UserFeature;
+namespace UsersFeature;
 public static class UsersServicesCollection
 {
 
