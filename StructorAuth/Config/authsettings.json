@@ -1,0 +1,14 @@
+{
+  "JWT": {
+    "Issuer": "exampleIssuer",
+    "Audience": "exampleAudience",
+    "Keys": {
+      "Access": "exampleAccessSecret",
+      "Refresh": "exampleRefreshSecret"
+    },
+    "Expiry": {
+      "Access": "30", // access token expiry duration in minutes
+      "Refresh": "30" // refresh token expiry duration in days
+    }
+  }
+}

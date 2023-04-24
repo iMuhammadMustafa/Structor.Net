@@ -3,7 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structor", "Structor\Structor.csproj", "{03186D28-0CC6-499D-BDD9-1CA44CDB588F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Structor", "Structor\Structor.csproj", "{03186D28-0CC6-499D-BDD9-1CA44CDB588F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3CA77A80-28F6-4EF3-AF12-0AFF4E9E9867}"
+	ProjectSection(SolutionItems) = preProject
+		.csharpierrc.json = .csharpierrc.json
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructorAuth", "StructorAuth\StructorAuth.csproj", "{31248478-E05B-43C2-9ED6-95BB93983C2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +22,10 @@ Global
 		{03186D28-0CC6-499D-BDD9-1CA44CDB588F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03186D28-0CC6-499D-BDD9-1CA44CDB588F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03186D28-0CC6-499D-BDD9-1CA44CDB588F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31248478-E05B-43C2-9ED6-95BB93983C2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31248478-E05B-43C2-9ED6-95BB93983C2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31248478-E05B-43C2-9ED6-95BB93983C2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31248478-E05B-43C2-9ED6-95BB93983C2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
