@@ -1,4 +1,5 @@
 ﻿namespace StructorAuth.Entities;
+//TODO: Convert this to options object injected from ServicesCollections
 public class OAuthResponseEntity
 {
     public string? Username { get; set; }
