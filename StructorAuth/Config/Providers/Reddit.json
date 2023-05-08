@@ -1,0 +1,11 @@
+{
+  "Reddit": {
+    "ClientId": "YourRedditClientIdHere",
+    "ClientSecret": "YourRedditClientSecretHere",
+    "AuthorizationEndpoint": "https://www.reddit.com/api/v1/authorize",
+    "TokenEndpoint": "https://www.reddit.com/api/v1/access_token",
+    "UserInformationEndpoint": "https://oauth.reddit.com/api/v1/me",
+    "Scope": "identity",
+    "CallbackPath": "api/oauth/reddit/redirect"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Github": {
+    "ClientId": "200fc44a13e943d80325",
+    "ClientSecret": "3c0768c80f0fd7e17a9134559c63ce27f3c1b4e5",
+    "AuthorizationEndpoint": "https://github.com/login/oauth/authorize",
+    "TokenEndpoint": "https://github.com/login/oauth/access_token",
+    "UserInformationEndpoint": "https://api.github.com/user",
+    "Scope": "read:user user:email",
+    //"CallbackPath": "api/oauth/github/redirect",
+    "CallbackPath": "https://localhost:5001/api/oauth/github/callback"
+  }
+}

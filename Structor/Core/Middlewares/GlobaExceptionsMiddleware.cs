@@ -52,6 +52,11 @@ public class GlobaExceptionsMiddleware
                     errorObj.WithError(ex, 404);
                     break;
                 }
+            case NotImplementedException NotImplementedException:
+                {
+                    errorObj.WithError(ex, 404);
+                    break;
+                }
 
             default:
                 {

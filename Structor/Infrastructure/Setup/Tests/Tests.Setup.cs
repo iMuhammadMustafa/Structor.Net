@@ -41,6 +41,18 @@ namespace Structor.Infrastructure.Setup.Tests
     }
 
 
+    public class BaseSetupFixture
+    {
+        public IConfigurationRoot Configuration { get; set; }
+        public BaseSetupFixture()
+        {
+            // 1. Get the configuration object from  appsettings.json
+            Configuration = new ConfigurationBuilder()
+                                .SetBasePath(Directory.GetCurrentDirectory())
+                                .AddJsonFile("appsettings.json")
+                                .Build();
+        }
+    }
 
     public class DependencySetupFixture<TContext>
     where TContext : DbContext

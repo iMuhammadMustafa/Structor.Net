@@ -17,6 +17,11 @@ public enum JWTEnum
     Access,
     Refresh
 }
+public interface IJWTService
+{
+    (string accessToken, string refreshToken) GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null);
+    IEnumerable<Claim> ValidateToken(string token, JWTEnum tokenType = JWTEnum.Access);
+}
 public class JWTService : IJWTService
 {
     private readonly string Issuer = AuthenticationSettings.JWT_Issuer;
@@ -27,7 +32,7 @@ public class JWTService : IJWTService
     private readonly string RefreshDuration = AuthenticationSettings.JWT_RefreshDuration;
 
 
-    public (string, string) GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null)
+    public (string accessToken, string refreshToken) GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null)
     {
         var accessClaims = GenerateClaims(_claims);
         var refreshClaims = GenerateClaims(_refreshClaims ?? _claims);

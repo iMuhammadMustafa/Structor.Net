@@ -18,6 +18,7 @@ public class DependencySetupFixture : IDisposable
         Configuration = new ConfigurationBuilder()
                             .SetBasePath(ConfigurationPath)
                             .AddJsonFile("authsettings.json")
+
                             .Build();
 
 

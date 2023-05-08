@@ -4,8 +4,8 @@ using Structor.Infrastructure.DTOs.REST;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace Structor.Core;
-[Route("api/[controller]")]
+namespace Structor.Features.Users.Controllers;
+[Route("api/[controller]/[action]")]
 [ApiController]
 [Authorize]
 public class ValuesController : ControllerBase

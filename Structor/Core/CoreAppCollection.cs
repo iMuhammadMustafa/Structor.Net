@@ -7,7 +7,6 @@ public static class CoreAppCollection
 
     public static WebApplication UseCoreApp(this WebApplication app)
     {
-        //app.UseRouting();
 
         app.UseMiddleware<GlobaExceptionsMiddleware>();
 
@@ -25,14 +24,6 @@ public static class CoreAppCollection
 
         app.UseHttpsRedirection();
         app.MapControllers();
-
-        //app.UseEndpoints(endpoints =>
-        //{
-        //    endpoints.MapControllerRoute(
-        //        name: "default",
-        //        pattern: "api/{controller=Home}/{action=Index}/{id?}"
-        //        );
-        //});
 
 
         return app;

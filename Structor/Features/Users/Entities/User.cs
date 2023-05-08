@@ -15,7 +15,7 @@ public class User : IEntity
     public string Password { get; set; } = default!;
     public string? Name { get; set; }
 
-    public ProvidersEnum Provider { get; set; }
+    public string Provider { get; set; } = default!;
 
     public string? EmailConfirmationCode { get; set; }
     public bool IsEmailConfirmed { get; set; } = false;

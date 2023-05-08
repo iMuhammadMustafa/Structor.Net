@@ -1,118 +1,175 @@
-﻿using System.Net;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
 using Structor.Features.Users;
 using Structor.Infrastructure;
+using StructorAuth;
 
 namespace Structor.Core;
 
 public static class CoreServicesCollection
 {
-
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers()
-            .AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.Converters.Add(new StringEnumConverter());
-            });
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter()); //Stringify Enum in JSON
+                });
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerConfig();
+
+        services.AddAuthenticationConfig(configuration);
+        services.AddFeaturesServices(configuration);
+
+        return services;
+    }
+
+    public static IServiceCollection AddFeaturesServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddInfrastructureServices(configuration);
+        services.AddUsersServices(configuration);
+
+
+        return services;
+    }
+
+
+    public static IServiceCollection AddSwaggerConfig(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(c =>
+        {
+            c.CustomSchemaIds(x => x.FullName);
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            c.AddStructorSwaggerJwtConfig();
+        });
+        return services;
+    }
+
+    public static IServiceCollection AddAuthenticationConfig(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddStructorAuthServices(configuration);
+        services.AddStructorJwtAuthentication((options) =>
+        {
+            options.TokenExpiryHeader = "IsTokenExpired";
+        });
+        //.AddOAuthProvidersConfig()
+        //.AddGithubJwtOAuth();
+
+
+
+        return services;
+    }
+}
+
+/*
+Core
+    Middleware
+    Filters
+    
+Infrastructure
+    DbContext
+    Generic Repository
+    Notifications
+    Generic Exceptions
+    Response Model
+    Mapper
+*/
+
+
+/*
+
+
+
+
+        //services.AddAuthentication("reddit-cookie")
+        //.AddCookie("reddit-cookie", options =>
+        //{
+        //    options.LoginPath = "/api/Users/LoginExternal";
+        //})
+
+
+
         //options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
         //    .AddJsonOptions(options =>
         //    {
         //        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         //        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         //    });
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(options =>
-        {
-            options.CustomSchemaIds(x => x.FullName);
-        });
+
+
+       .AddOAuth("reddit", options =>
+         {
+             options.SignInScheme = "X-Access-Token";
+
+
+             //Required
+             options.ClientId = "223c62ed7f7167523c3a";
+             options.ClientSecret = "571fd2e2a9c96612303a7985870b50e9b79e4ca1";
+
+
+             //options.AuthorizationEndpoint = "https://oauth.mocklab.io/oauth/authorize";
+             //options.TokenEndpoint = "https://oauth.mocklab.io/oauth/token";
+             //options.UserInformationEndpoint = "https://oauth.mocklab.io/userinfo";
 
 
 
-        services.AddSwaggerGen(c =>
-        {
-            c.CustomSchemaIds(x => x.FullName);
-            c.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "My API",
-                Version = "v1"
-            });
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                In = ParameterLocation.Header,
-                Description = "Please insert JWT with Bearer into field",
-                Name = "Authorization",
-                Type = SecuritySchemeType.ApiKey
-            });
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-               {
-                 new OpenApiSecurityScheme
+
+
+             options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
+             options.TokenEndpoint = "https://github.com/login/oauth/access_token";
+             options.UserInformationEndpoint = "https://api.github.com/user";
+
+
+             ////options.ReturnUrlParameter = new Uri("https://localhost:7021/api/Users/SignExternal").ToString();
+             //options.ReturnUrlParameter = "/api/Users/SignExternal";
+             //Required
+             options.CallbackPath = "/api/Users/AfterLogin";
+
+             //Required
+             options.Scope.Clear();
+             options.Scope.Add("read:user");
+             options.SaveTokens = true;
+
+
+             options.Events.OnCreatingTicket = async context =>
+             {
+                 using var request = new HttpRequestMessage(HttpMethod.Get, options.UserInformationEndpoint);
+                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+                 using var result = await context.Backchannel.SendAsync(request);
+
+                 var user = await result?.Content?.ReadFromJsonAsync<JsonElement>();
+
+                 context.RunClaimActions(user);
+
+
+                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secret-key-here"));
+                 var expiration = DateTime.UtcNow.AddHours(1);
+
+                 // Create claims for the token
+                 var claims = new Claim[]
                  {
-                   Reference = new OpenApiReference
-                   {
-                     Type = ReferenceType.SecurityScheme,
-                     Id = "Bearer"
-                   }
-                  },
-                  new string[] { }
-                }
-              });
-        });
+                    new Claim(ClaimTypes.Name, "John Doe"),
+                    new Claim(ClaimTypes.Email, "john.doe@example.com")
+                 };
 
-        services.AddAuthentication()
-        //    options =>
-        //{
-        //    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        //    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        //})
-        .AddCookie()
-        .AddCookie("reddit-cookie")
-        //services.AddAuthentication
-        //(options =>
-        //{
-        //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        //})
-        //.AddJwtBearer(options =>
-        //{
-        //    options.Events = new JwtBearerEvents
-        //    {
-        //        OnMessageReceived = context =>
-        //        {
-        //            context.Token = context.Request.Cookies["X-Access-Token"];
-        //            return Task.CompletedTask;
-        //        },
+                 // Create the token
+                 var token = new JwtSecurityToken(
+                     claims: claims,
+                     expires: expiration,
+                     signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+                 );
 
-        //        OnAuthenticationFailed = context =>
-        //        {
-        //            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-        //            {
-        //                context.Response.Headers.Add("IS-TOKEN-EXPIRED", "true");
-        //            }
-        //            return Task.CompletedTask;
-        //        }
-        //    };
+                 // Generate the token string
+                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
 
+                 //await HttpContext.SignInAsync(JwtBearerDefaults.AuthenticationScheme, principal, authProperties);
 
-        //    options.TokenValidationParameters = new TokenValidationParameters
-        //    {
-        //        ValidateIssuer = false,
-        //        ValidateAudience = false,
-        //        ValidateLifetime = false,
-        //        ValidateIssuerSigningKey = true,
-        //        ValidIssuer = configuration["JWT:Issuer"],
-        //        ValidAudience = configuration["JWT:Audience"],
-        //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]))
-        //    };
+             };
 
-        //})
+         });
+
         //.AddOpenIdConnect("Reddit", options =>
         //{
         //    options.ClientId = "OcR7QHK62z9AiNZJTxc4_w";
@@ -174,43 +231,6 @@ public static class CoreServicesCollection
 
 
         //});
-        .AddOAuth("reddit", options =>
-         {
-             options.SignInScheme = "reddit-cookie";
-
-
-             //Required
-             options.ClientId = "223c62ed7f7167523c3a";
-             options.ClientSecret = "571fd2e2a9c96612303a7985870b50e9b79e4ca1";
-
-
-             //options.AuthorizationEndpoint = "https://oauth.mocklab.io/oauth/authorize";
-             //options.TokenEndpoint = "https://oauth.mocklab.io/oauth/token";
-             //options.UserInformationEndpoint = "https://oauth.mocklab.io/userinfo";
-
-
-
-
-
-             options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-             options.TokenEndpoint = "https://www.reddit.com/api/v1/access_token";
-             options.UserInformationEndpoint = "https://oauth.reddit.com/api/v1/me";
-
-
-             ////options.ReturnUrlParameter = new Uri("https://localhost:7021/api/Users/SignExternal").ToString();
-             //options.ReturnUrlParameter = "/api/Users/SignExternal";
-             //Required
-             options.CallbackPath = "/";
-
-             //Required
-             options.Scope.Clear();
-             options.Scope.Add("read:user");
-             options.SaveTokens = true;
-
-
-
-
-         });
 
         //.AddMicrosoftAccount(options =>
         //{
@@ -233,33 +253,4 @@ public static class CoreServicesCollection
         //    options.Scope.Add("profile");
         //    options.SaveTokens = true;
         //});
-
-
-        services.AddInfrastructureServices(configuration);
-        services.AddFeaturesServices(configuration);
-        return services;
-    }
-
-
-    public static IServiceCollection AddFeaturesServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddUsersServices(configuration);
-        return services;
-    }
-
-
-}
-
-/*
-Core 
-	Middleware
-	Filters
-	
-Infrastructure
-	DbContext
-	Generic Repository
-	Notifications
-	Generic Exceptions
-	Response Model
-	Mapper
-*/
+ */
