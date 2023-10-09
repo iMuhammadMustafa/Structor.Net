@@ -9,9 +9,9 @@ namespace Structor.Infrastructure.Repositories;
 public class Repository : IClassFixture<DbContextSetupFixture<TestDbContext>>
 {
     private TestRepo _repo { get; set; }
-    public Repository(DbContextSetupFixture<TestDbContext> sqliteDbContextSetupFixture)
+    public Repository(DbContextSetupFixture<TestDbContext> dbContextSetupFixture)
     {
-        TestDbContext _testDbContext = sqliteDbContextSetupFixture.CreateContextForSQLiteInMemory();
+        TestDbContext _testDbContext = dbContextSetupFixture.CreateContextForSQLiteInMemory();
         
         var _logger = Substitute.For<ILogger<TestRepo>>();
 
