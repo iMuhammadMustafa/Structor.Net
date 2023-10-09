@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Structor.Infrastructure.DTOs.REST;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Structor.Core.Middlewares;
 
-public class GlobaExceptionsMiddleware
+public class GlobalExceptionsMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly IOptions<MvcNewtonsoftJsonOptions> _jsonOptions;
+    private readonly IOptions<JsonOptions> _jsonOptions;
 
-    public GlobaExceptionsMiddleware(RequestDelegate next, IOptions<MvcNewtonsoftJsonOptions> jsonOptions)
+    public GlobalExceptionsMiddleware(RequestDelegate next, IOptions<JsonOptions> jsonOptions)
     {
         _next = next;
         _jsonOptions = jsonOptions;
@@ -68,7 +69,7 @@ public class GlobaExceptionsMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = errorObj.StatusCode;
 
-        await context.Response.WriteAsync(JsonConvert.SerializeObject(errorObj, _jsonOptions.Value.SerializerSettings));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(errorObj, _jsonOptions.Value.JsonSerializerOptions));
 
         throw ex;
     }

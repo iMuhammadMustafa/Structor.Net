@@ -3,19 +3,24 @@
 public class IResponse<T>
 {
     public T? Data { get; set; }
+    public int StatusCode { get; set; } = 200;
+    public ResponseStatus Status { get; set; }
     public object? Error { get; set; }
-    public int StatusCode { get; set; }
-    public ResponseStatus? Status { get; set; } = null;
     public string? Message { get; set; }
     public IPagination? Pagination { get; set; }
 
 
     public IResponse<T> WithData(T data, int statusCode = 200)
     {
-        //this.Status = ResponseStatus.Success;
         Data = data;
 
         StatusCode = statusCode;
+        Status = ResponseStatus.Success;
+        return this;
+    }
+    public IResponse<T> WithPagination(IPagination pagination)
+    {
+        Pagination = pagination;
         return this;
     }
     public IResponse<T> WithError(object error, int statusCode = 500)
@@ -23,11 +28,6 @@ public class IResponse<T>
         Status = ResponseStatus.Failure;
         Error = error;
         StatusCode = statusCode;
-        return this;
-    }
-    public IResponse<T> WithPagination(IPagination pagination)
-    {
-        Pagination = pagination;
         return this;
     }
     public IResponse<T?> WithMessage(string message)
@@ -54,37 +54,35 @@ public class IResponse<T>
 
 public class IPagination
 {
-    private int _PageNumber;
-    private int _PageSize;
-    public int PageNumber
+    private int _pageNumber;
+    private int _pageSize;
+    public int Page
     {
         get
         {
-            return _PageNumber;
+            return _pageNumber;
         }
         set
         {
-            _PageNumber = value < 0 ? 0 : value;
+            _pageNumber = value < 0 ? 0 : value;
         }
 
     }
-    public int PageSize
+    public int Size
     {
         get
         {
-            return _PageSize;
+            return _pageSize;
         }
         set
         {
-            if (value < 0) { _PageSize = 10; }
-            if (value > 10) { _PageSize = value; }
-            if (value > 100) { _PageSize = 100; }
+            if (value <= 0) { _pageSize = 10; }
+            if (value >= 10) { _pageSize = value; }
+            if (value > 100) { _pageSize = 100; }
         }
     }
     public int? TotalCount { get; set; }
     public int? TotalPages { get; set; }
-
-
 
 }
 

@@ -10,7 +10,12 @@ using Structor.Infrastructure.Repositories;
 namespace Structor.Features.Users.Repositories;
 public class UserRepository : Repository<User, CoreDbContext>, IUserRepository
 {
-    public UserRepository(CoreDbContext coreDbContext) : base(coreDbContext) { }
+    private readonly ILogger<UserRepository> _logger;
+
+    public UserRepository(CoreDbContext coreDbContext, ILogger<UserRepository> logger) : base(coreDbContext, logger)
+    {
+        _logger = logger;
+    }
 
 
 }

@@ -90,7 +90,7 @@ public static class StructorAuthServicesCollection
 
         return new AuthenticationBuilder(services);
     }
-    public static void AddStructorSwaggerJwtConfig(this SwaggerGenOptions swaggerGenOptions)
+    public static void AddStructorAuthSwaggerJwtConfig(this SwaggerGenOptions swaggerGenOptions)
     {
         var securitySchemeName = "Bearer";
         var securityScheme = new OpenApiSecurityScheme

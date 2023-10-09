@@ -25,8 +25,8 @@ public class ValuesController : ControllerBase
         res.WithData(test)
             .WithPagination(new IPagination
             {
-                PageNumber = 1,
-                PageSize = 10,
+                Page = 1,
+                Size = 10,
                 TotalPages = 10,
                 TotalCount = 10,
             });

@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
-using Newtonsoft.Json.Converters;
+﻿using Microsoft.OpenApi.Models;
 using Structor.Features.Users;
 using Structor.Infrastructure;
 using StructorAuth;
+using System.Text.Json.Serialization;
 
 namespace Structor.Core;
 
@@ -11,16 +10,12 @@ public static class CoreServicesCollection
 {
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddControllers()
-                .AddNewtonsoftJson(options =>
-                {
-                    options.SerializerSettings.Converters.Add(new StringEnumConverter()); //Stringify Enum in JSON
-                });
-        services.AddEndpointsApiExplorer();
+        services.AddDefaultServices();
         services.AddSwaggerConfig();
 
-        services.AddAuthenticationConfig(configuration);
         services.AddFeaturesServices(configuration);
+        
+        //services.AddAuthenticationConfig(configuration);
 
         return services;
     }
@@ -34,6 +29,17 @@ public static class CoreServicesCollection
         return services;
     }
 
+    public static IServiceCollection AddDefaultServices(this IServiceCollection services)
+    {
+        services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); //Stringify Enum in JSON
+                });
+
+        return services;
+    }
+
 
     public static IServiceCollection AddSwaggerConfig(this IServiceCollection services)
     {
@@ -41,7 +47,7 @@ public static class CoreServicesCollection
         {
             c.CustomSchemaIds(x => x.FullName);
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-            c.AddStructorSwaggerJwtConfig();
+            c.AddStructorAuthSwaggerJwtConfig();
         });
         return services;
     }
@@ -55,8 +61,6 @@ public static class CoreServicesCollection
         });
         //.AddOAuthProvidersConfig()
         //.AddGithubJwtOAuth();
-
-
 
         return services;
     }

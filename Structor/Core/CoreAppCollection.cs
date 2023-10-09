@@ -8,7 +8,7 @@ public static class CoreAppCollection
     public static WebApplication UseCoreApp(this WebApplication app)
     {
 
-        app.UseMiddleware<GlobaExceptionsMiddleware>();
+        app.UseMiddleware<GlobalExceptionsMiddleware>();
 
 
 

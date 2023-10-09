@@ -5,14 +5,17 @@ using Structor.Infrastructure.Entities;
 namespace Structor.Infrastructure.Repositories;
 
 public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
-    where TEntity : IEntity
-    where TContext : DbContext
+                                                            where TEntity : IEntity
+                                                            where TContext : DbContext
 {
     private readonly TContext _context;
+    private readonly ILogger _logger;
 
-    public Repository(TContext context)
+    public Repository(TContext context, ILogger logger)
     {
         _context = context;
+        _logger = logger;
+        //_context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
     }
 
     private DbSet<TEntity>? _dbSet;
@@ -28,10 +31,8 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
     }
 
 
-    /* */
     public virtual IQueryable<TEntity> GetAll() => DbSet.AsQueryable();
-
-    public virtual IQueryable<TEntity> GetIncluding(params Expression<Func<TEntity, object>>[] included)
+    public virtual IQueryable<TEntity> GetAllIncluding(params Expression<Func<TEntity, object>>[] included)
     {
         var queryable = DbSet.AsQueryable();
 
@@ -46,15 +47,15 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
 
     public virtual async Task<TEntity> GetByGuid(Guid guid) => await DbSet.FirstOrDefaultAsync(Entity => Entity.Guid == guid) ?? null!;
 
-    public virtual async Task<int> GetCount() => await DbSet.CountAsync();
+    public virtual async Task<int> Count() => await DbSet.CountAsync();
 
-    public virtual async Task<int> GetCountWhere(Expression<Func<TEntity, bool>> expression) => await DbSet.Where(expression).CountAsync();
+    public virtual async Task<int> CountWhere(Expression<Func<TEntity, bool>> expression) => await DbSet.Where(expression).CountAsync();
 
 
     public virtual async Task<TEntity> Insert(TEntity entity, bool saveChanges = false)
     {
         var dbEntity = await DbSet.AddAsync(entity);
-        if (saveChanges == true)
+        if (saveChanges)
         {
             await SaveChanges();
         }
@@ -65,7 +66,7 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
         var entry = DbSet.Attach(entity);
         entry.State = EntityState.Modified;
 
-        if (saveChanges == true) { return await SaveChanges(); }
+        if (saveChanges) { return await SaveChanges(); }
 
         return true;
     }
@@ -73,7 +74,7 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
     {
         DbSet.Attach(entity);
         _context.Remove(entity);
-        if (saveChanges == true) { return await SaveChanges(); }
+        if (saveChanges) { return await SaveChanges(); }
 
         return true;
     }
@@ -87,7 +88,7 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.LogError($"Error in {this.GetType} with message: {ex.Message} \n Error trace: \n  {ex.ToString()}");
             return false;
             throw;
         }

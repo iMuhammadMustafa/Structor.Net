@@ -1,26 +1,24 @@
-﻿using Infrastructure.DatabaseContext;
-using Microsoft.EntityFrameworkCore;
-using Moq;
+﻿using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using Structor.Infrastructure.Extentions;
 using Structor.Infrastructure.Setup.Tests;
 using Xunit;
 
 namespace Structor.Infrastructure.Repositories;
 
-public class Repository : IClassFixture<SqliteDbContextSetupFixture<CoreDbContext>>
+public class Repository : IClassFixture<DbContextSetupFixture<TestDbContext>>
 {
-
-    private CoreDbContext _coreDbContext { get; set; }
-    private Repository<TestEntity, CoreDbContext> _repo { get; set; }
-
-    public Repository(SqliteDbContextSetupFixture<CoreDbContext> sqliteDbContextSetupFixture)
+    private TestRepo _repo { get; set; }
+    public Repository(DbContextSetupFixture<TestDbContext> sqliteDbContextSetupFixture)
     {
-        _coreDbContext = sqliteDbContextSetupFixture.CreateContextForSQLiteInMemory();
-        var mock = new Mock<Repository<TestEntity, CoreDbContext>>(_coreDbContext)
-        {
-            CallBase = true
-        };
-        _repo = mock.Object;
+        TestDbContext _testDbContext = sqliteDbContextSetupFixture.CreateContextForSQLiteInMemory();
+        
+        var _logger = Substitute.For<ILogger<TestRepo>>();
+
+        _repo = new TestRepo(_testDbContext, _logger);
+        // If you want to test the abstract repository itself not the implementer of it then: 
+        //_repo = Substitute.ForPartsOf<Repository<TestEntity, TestDbContext>>(_testDbContext, _logger);
+        //private IRepository<TestEntity> _repo { get; set; }
     }
 
 
@@ -56,7 +54,7 @@ public class Repository : IClassFixture<SqliteDbContextSetupFixture<CoreDbContex
         var createdEntity = await _repo.Insert(newEntity, true);
 
         var deleteRes = await _repo.Delete(createdEntity, true);
-        var count = await _repo.GetCount();
+        var count = await _repo.Count();
         var entity = await _repo.GetById(createdEntity.Id);
 
         Assert.True(deleteRes);
@@ -75,7 +73,7 @@ public class Repository : IClassFixture<SqliteDbContextSetupFixture<CoreDbContex
         await _repo.SaveChanges();
 
         //Act 
-        var res = await _repo.GetCount();
+        var res = await _repo.Count();
 
         //Assert
         Assert.NotEqual(0, res);
@@ -160,7 +158,7 @@ public class Repository : IClassFixture<SqliteDbContextSetupFixture<CoreDbContex
         await _repo.SaveChanges();
 
         //Act 
-        var res = await _repo.GetCountWhere(entity => entity.Id > 5);
+        var res = await _repo.CountWhere(entity => entity.Id > 5);
 
         //Assert
         Assert.NotEqual(0, res);
@@ -262,12 +260,11 @@ public class Repository : IClassFixture<SqliteDbContextSetupFixture<CoreDbContex
         Assert.NotNull(res.FirstOrDefault());
         Assert.Equal(result.Guid, res.FirstOrDefault()!.Guid);
     }
+}
 
-
-
-
-
-
-
-
+public class TestRepo : Repository<TestEntity, TestDbContext>
+{
+    public TestRepo(TestDbContext context, ILogger<TestRepo> logger) : base(context, logger)
+    {
+    }
 }
