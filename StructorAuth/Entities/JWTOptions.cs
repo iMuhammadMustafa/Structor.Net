@@ -1,6 +1,13 @@
-﻿namespace StructorAuth.Entities;
-public class StructorJWTOptions
+﻿namespace Structor.Auth.Entities;
+public class JWTOptions
 {
+
+    public string? Issuer { get; set; }
+    public string? Audience {get; set;}
+    public string? AccessSecret {get; set;}
+    public string? AccessDuration {get; set;}
+    public string? RefreshSecret {get; set;}
+    public string? RefreshDuration {get; set;}
     public string? AccessCookie { get; set; }
     public string? TokenExpiryHeader { get; set; }
 

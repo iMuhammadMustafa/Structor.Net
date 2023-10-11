@@ -1,7 +1,8 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.OpenApi.Models;
+using Structor.Auth;
 using Structor.Features.Users;
 using Structor.Infrastructure;
-using StructorAuth;
 using System.Text.Json.Serialization;
 
 namespace Structor.Core;
@@ -14,8 +15,8 @@ public static class CoreServicesCollection
         services.AddSwaggerConfig();
 
         services.AddFeaturesServices(configuration);
-        
-        //services.AddAuthenticationConfig(configuration);
+
+        services.AddAuthenticationServices(configuration);
 
         return services;
     }
@@ -52,15 +53,32 @@ public static class CoreServicesCollection
         return services;
     }
 
-    public static IServiceCollection AddAuthenticationConfig(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration _configuration)
     {
-        services.AddStructorAuthServices(configuration);
-        services.AddStructorJwtAuthentication((options) =>
-        {
-            options.TokenExpiryHeader = "IsTokenExpired";
-        });
-        //.AddOAuthProvidersConfig()
-        //.AddGithubJwtOAuth();
+
+        services.AddStructorAuthServices()
+                .AddStructorJwtAuth((options) =>
+                {
+                    options.Issuer = _configuration["JWT:Issuer"];
+                    options.Audience = _configuration["JWT:Audience"];
+
+                    options.AccessSecret = _configuration["JWT:Keys:Access"]!;
+                    options.AccessDuration = _configuration["JWT:Expiry:Access"];
+
+                    options.RefreshSecret = _configuration["JWT:Keys:Refresh"];
+                    options.RefreshDuration = _configuration["JWT:Expiry:Refresh"];
+
+                    options.AccessCookie = _configuration["JWT:Cookie:AccessHeader"];
+                    options.TokenExpiryHeader = _configuration["JWT:Cookie:ExpiryHeader"];
+                })
+                .AddStructorOAuth()
+                .AddGithubOAuth((options) =>
+                {
+                    options.ClientId = "200fc44a13e943d80325";
+                    options.ClientSecret = "0c5a30ad5ef0b17fbcad5a078b26f61d97b6e9dc";
+                    options.CallbackUrl = "https://localhost:5001/api/oauth/github/callback";
+                    
+                });
 
         return services;
     }

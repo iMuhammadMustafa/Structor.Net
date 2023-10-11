@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using NSubstitute;
 using StructorAuth.Config;
 using Xunit;
 
@@ -29,11 +29,11 @@ public class JWTServiceTests : IClassFixture<DependencySetupFixture>
         };
 
         // Act
-        var (accessToken, refreshToken) = _jwtService.GenerateJWTokens(claims);
+        var jwt = _jwtService.GenerateJWTokens(claims);
 
         // Assert
-        accessToken.Should().NotBeNullOrWhiteSpace();
-        refreshToken.Should().NotBeNullOrWhiteSpace();
+        jwt.AccessToken.Should().NotBeNullOrWhiteSpace();
+        jwt.RefreshToken.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
@@ -45,10 +45,10 @@ public class JWTServiceTests : IClassFixture<DependencySetupFixture>
             { "sub", "12345" },
             { "email", "test@example.com" }
         };
-        var (accessToken, _) = _jwtService.GenerateJWTokens(claims);
+        var jwt = _jwtService.GenerateJWTokens(claims);
 
         // Act
-        var result = _jwtService.ValidateToken(accessToken, JWTEnum.Access);
+        var result = _jwtService.ValidateToken(jwt.AccessToken, JWTEnum.Access);
 
         // Assert
         result.Should().NotBeNullOrEmpty();
@@ -86,23 +86,24 @@ public class JWTServiceTests : IClassFixture<DependencySetupFixture>
             { "role", "User" }
         };
 
-        var mockConfig = new Mock<IConfiguration>();
-        mockConfig.Setup(c => c["JWT:Issuer"]).Returns("exampleIssuer");
-        mockConfig.Setup(c => c["JWT:Audience"]).Returns("exampleAudience");
-        mockConfig.Setup(c => c["JWT:Keys:Access"]).Returns("accessKey+SupersecretKey");
-        mockConfig.Setup(c => c["JWT:Expiry:Access"]).Returns("30");
-        mockConfig.Setup(c => c["JWT:Keys:Refresh"]).Returns("refreshKey+SupersecretKey");
-        mockConfig.Setup(c => c["JWT:Expiry:Refresh"]).Returns("365");
+        var mockConfig = Substitute.For<IConfiguration>();
+        
+        mockConfig["JWT:Issuer"].Returns("exampleIssuer");
+        mockConfig["JWT:Audience"].Returns("exampleAudience");
+        mockConfig["JWT:Keys:Access"].Returns("accessKey+SupersecretKey");
+        mockConfig["JWT:Expiry:Access"].Returns("30");
+        mockConfig["JWT:Keys:Refresh"].Returns("refreshKey+SupersecretKey");
+        mockConfig["JWT:Expiry:Refresh"].Returns("365");
 
 
-        //var authSettings = new AuthenticationSettings(mockConfig.Object);
-        AuthenticationSettings.Initialize(mockConfig.Object);
+        //var authSettings = new JWTSettings(mockConfig.Object);
+        JWTSettings.Initialize(mockConfig);
         var jwtService = new JWTService();
-        var (accessToken, refreshToken) = jwtService.GenerateJWTokens(claims, refreshClaims);
+        var jwt = jwtService.GenerateJWTokens(claims, refreshClaims);
 
         // Act
-        var accessResults = jwtService.ValidateToken(accessToken, JWTEnum.Access);
-        var refreshResults = jwtService.ValidateToken(refreshToken, JWTEnum.Refresh);
+        var accessResults = jwtService.ValidateToken(jwt.AccessToken, JWTEnum.Access);
+        var refreshResults = jwtService.ValidateToken(jwt.RefreshToken, JWTEnum.Refresh);
 
         // Assert
         accessResults.Should().NotBeNull();

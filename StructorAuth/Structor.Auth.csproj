@@ -1,30 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<UserSecretsId>8b12a798-abdf-4af2-86bb-8f67a091b7ff</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Config\appsettings.json" />
+    <None Remove="Config\Providers\Github.json" />
+  </ItemGroup>
 
-	<ItemGroup Condition="'$(Configuration)' == 'Release'">
-		<Compile Remove="**\*.Tests.cs" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(Configuration)' != 'Release'">
-		<PackageReference Include="coverlet.collector" Version="3.2.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
-		<PackageReference Include="xunit" Version="2.4.2" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Moq" Version="4.18.4" />
-		<PackageReference Include="FluentAssertions" Version="6.11.0" />
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Config\appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Providers\Github.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 	
 	
   <ItemGroup>
@@ -40,5 +35,15 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
   </ItemGroup>
+	
+	
+  <ItemGroup>
+    <None Update="Config\Providers\Facebook.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+	
+	
+  <ProjectExtensions><VisualStudio><UserProperties config_4providers_4facebook_1json__JsonSchema="" config_4providers_4github_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>

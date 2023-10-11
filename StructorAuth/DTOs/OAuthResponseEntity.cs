@@ -1,4 +1,4 @@
-﻿namespace StructorAuth.Entities;
+﻿namespace Structor.Auth.DTOs;
 //TODO: Convert this to options object injected from ServicesCollections
 public class OAuthResponseEntity
 {

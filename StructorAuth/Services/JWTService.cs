@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Structor.Auth.DTOs;
 using StructorAuth.Config;
 
 namespace StructorAuth.Services;
@@ -19,28 +13,32 @@ public enum JWTEnum
 }
 public interface IJWTService
 {
-    (string accessToken, string refreshToken) GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null);
+    JwtDto GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null);
     IEnumerable<Claim> ValidateToken(string token, JWTEnum tokenType = JWTEnum.Access);
 }
 public class JWTService : IJWTService
 {
-    private readonly string Issuer = AuthenticationSettings.JWT_Issuer;
-    private readonly string Audience = AuthenticationSettings.JWT_Audience;
-    private readonly string AccessSecret = AuthenticationSettings.JWT_AccessSecret;
-    private readonly string AccessDuration = AuthenticationSettings.JWT_AccessDuration;
-    private readonly string RefreshSecret = AuthenticationSettings.JWT_RefreshSecret;
-    private readonly string RefreshDuration = AuthenticationSettings.JWT_RefreshDuration;
+    private readonly string Issuer = JWTSettings.Issuer;
+    private readonly string Audience = JWTSettings.Audience;
+    private readonly string AccessSecret = JWTSettings.AccessSecret;
+    private readonly string AccessDuration = JWTSettings.AccessDuration;
+    private readonly string RefreshSecret = JWTSettings.RefreshSecret;
+    private readonly string RefreshDuration = JWTSettings.RefreshDuration;
 
 
-    public (string accessToken, string refreshToken) GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null)
+    public JwtDto GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null)
     {
         var accessClaims = GenerateClaims(_claims);
         var refreshClaims = GenerateClaims(_refreshClaims ?? _claims);
 
-        var accessToken = GenerateToken(accessClaims, JWTEnum.Access);
-        var refreshToken = GenerateToken(refreshClaims, JWTEnum.Refresh);
 
-        return (accessToken, refreshToken);
+        JwtDto jwt = new()
+        {
+            AccessToken = GenerateToken(accessClaims, JWTEnum.Access),
+            RefreshToken = GenerateToken(refreshClaims, JWTEnum.Refresh)
+        };
+
+        return jwt;
     }
 
     private string GenerateToken(IEnumerable<Claim> claims, JWTEnum keyType)

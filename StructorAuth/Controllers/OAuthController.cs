@@ -1,15 +1,8 @@
-﻿using System.Net;
-using System.Net.Http.Headers;
-using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using StructorAuth.Config;
+using Structor.Auth.Enums;
 using StructorAuth.Config.Providers;
-using StructorAuth.Entities;
 using StructorAuth.Services;
 
 namespace StructorAuth.Controllers;
@@ -19,14 +12,13 @@ namespace StructorAuth.Controllers;
 public class OAuthController : ControllerBase
 {
     private readonly IDataProtectionProvider _protectionProvider;
+    private readonly IOAuthService _oAuthService;
 
-    public OAuthController(IDataProtectionProvider protectionProvider)
+    public OAuthController(IDataProtectionProvider protectionProvider, IOAuthService oAuthService)
     {
         _protectionProvider = protectionProvider;
+        _oAuthService = oAuthService;
     }
-
-
-
 
 
     /// <summary>
@@ -42,32 +34,20 @@ public class OAuthController : ControllerBase
     [HttpGet("{provider}")]
     public IActionResult Login(string provider)
     {
-
-        if (!Enum.TryParse(provider, ignoreCase: true, out StructorOAuthProvidersEnum oAuthProvider))
-        {
-            throw new BadHttpRequestException("Not a valid Provider");
-        }
-
-        switch (oAuthProvider)
-        {
-            case StructorOAuthProvidersEnum.Github:
-                {
-                    var _dataProtector = _protectionProvider.CreateProtector(StructorOAuthProvidersEnum.Github.ToString());
-
-                    var redirectPath = $"{Github.AuthorizationEndpoint}?client_id={Github.ClientId}&scope={Github.Scope}" +
-                                        $"&response_type=code&redirect_uri={Github.CallbackPath}&state={_dataProtector.Protect("Hello")}";
-
-
-                    return Redirect(redirectPath);
-                }
-            default:
-                {
-                    break;
-                }
-        }
-
-
-        return BadRequest("Not a valid Provider");
+        var redirectPath = _oAuthService.GetProviderRedirect(provider);
+        return Redirect(redirectPath);
     }
+
+    //[HttpGet]
+    //[Route("~/api/oauth/{provider}/callback")]
+    //public async Task<IActionResult> ProviderCallBack([FromRoute] string provider, [FromQuery] string code, [FromQuery] string state)
+    //{
+    //    var r = await _oAuthService.HandleProviderCallback(provider, code, state);
+
+
+
+    //    return Ok();
+
+    //}
 }
 

@@ -1,6 +1,6 @@
 using Serilog;
 using Structor.Core;
-using Structor.Core.Globals;
+using Structor.Infrastructure.Globals;
 
 var builder = WebApplication.CreateBuilder(args);
 
