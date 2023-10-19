@@ -5,12 +5,13 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>8b12a798-abdf-4af2-86bb-8f67a091b7ff</UserSecretsId>
   </PropertyGroup>
-
-	
   <ItemGroup>
-    <EmbeddedResource Include="Configurations\Providers\Github.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <None Remove="Configurations\Providers.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Configurations\Providers.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 

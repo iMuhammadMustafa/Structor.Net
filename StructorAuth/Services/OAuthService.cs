@@ -21,12 +21,32 @@ public class OAuthService : IOAuthService
 
     private readonly IDataProtectionProvider _protectionProvider;
     private readonly OAuthOptions _gitHubOptions;
+    private readonly OAuthOptions _googleOptions;
 
     public OAuthService(IDataProtectionProvider protectionProvider, IOptionsSnapshot<OAuthOptions> oAuthOptions)
     {
         _protectionProvider = protectionProvider;
         _gitHubOptions = oAuthOptions.Get(OAuthProvider.Github.ToString());
+        _googleOptions = oAuthOptions.Get(OAuthProvider.Google.ToString());
     }
+
+    private OAuthOptions GetProviderData(OAuthProvider provider)
+    {
+        switch (provider)
+        {
+            case OAuthProvider.Github:
+                {
+                    return _gitHubOptions;
+                }
+            case OAuthProvider.Google:
+                {
+                    return _googleOptions;
+                }
+            default:
+                throw new BadHttpRequestException("Not a valid Provider");
+        }
+    }
+
     public async Task<JsonNode> HandleProviderCallback(string providerString, string code, string state)
     {
         var provider = GetProviderEnum(providerString);
@@ -72,19 +92,6 @@ public class OAuthService : IOAuthService
 
         return oAuthProvider;
     }
-    private OAuthOptions GetProviderData(OAuthProvider provider)
-    {
-        switch (provider)
-        {
-            case OAuthProvider.Github:
-                {
-                    return _gitHubOptions;
-                }
-            default:
-                throw new BadHttpRequestException("Not a valid Provider");
-        }
-    }
-
     private bool ValidateState(string dataProtector, string stateSecret, string state)
     {
         var _dataProtector = _protectionProvider.CreateProtector(dataProtector);
@@ -107,6 +114,8 @@ public class OAuthService : IOAuthService
             client_secret = providerData.ClientSecret,
             code,
             redirect_uri = providerData.CallbackUrl,
+            response_type = "token",
+            grant_type = "authorization_code"
         });
         var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
         var response = await httpClient.PostAsync(providerData.TokenEndpoint, content);

@@ -72,7 +72,10 @@ public static class CoreServicesCollection
 
         //    options.CookieHeaders = jwtConfigurations.CookieHeaders;
         //})
+
+
         var gitHubConfigurations = configuration.GetSection("Github").Get<OAuthOptions>() ?? throw new NullReferenceException("No Configuration for Github available");
+        var googleConfigurations = configuration.GetSection("Google").Get<OAuthOptions>() ?? throw new NullReferenceException("No Configuration for Github available");
 
         services.AddStructorAuthServices()
                 .AddStructorJwtAuth(configuration.GetSection("JWT"))
@@ -83,6 +86,13 @@ public static class CoreServicesCollection
                     options.ClientSecret = gitHubConfigurations.ClientSecret;
                     options.CallbackUrl = gitHubConfigurations.CallbackUrl;
                     options.DataProtectionSecret = gitHubConfigurations.DataProtectionSecret;
+                })
+                .AddGoogleOAuth((options) =>
+                {
+                    options.ClientId = googleConfigurations.ClientId;
+                    options.ClientSecret = googleConfigurations.ClientSecret;
+                    options.CallbackUrl = googleConfigurations.CallbackUrl;
+                    options.DataProtectionSecret = googleConfigurations.DataProtectionSecret;
                 });
 
         return services;

@@ -6,11 +6,17 @@
     "AuthorizationEndpoint": "https://github.com/login/oauth/authorize",
     "TokenEndpoint": "https://github.com/login/oauth/access_token",
     "UserInformationEndpoint": "https://api.github.com/user",
-    "Scope": "read:user user:email",
+    "Scope": "read:user user:email"
     //"CallbackUrl": "https://localhost:5001/api/oauth/github/callback",
     //"DataProtectionSecret": "3c0768c80f0asdasdasa9134559c63ce27f3c1b4e5"
     //"CallbackBase": "https://localhost:5001/",
     //"CallbackPath": "api/oauth/github/callback"
     //"CallbackPath": "api/oauth/github/redirect",
+  },
+  "Google": {
+    "AuthorizationEndpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+    "TokenEndpoint": "https://oauth2.googleapis.com/token",
+    "UserInformationEndpoint": "https://www.googleapis.com/oauth2/v2/userinfo",
+    "Scope": "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
   }
 }

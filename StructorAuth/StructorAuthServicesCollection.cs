@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
@@ -8,8 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Structor.Auth.Config;
-using Structor.Auth.Config.Providers;
+using NSubstitute.Extensions;
 using Structor.Auth.Configurations;
 using Structor.Auth.Enums;
 using Structor.Auth.Services;
@@ -19,12 +17,19 @@ namespace Structor.Auth;
 
 public static class StructorAuthServicesCollection
 {
-    private static string _providersPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Configurations/Providers";
+    private static string _providersPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Configurations";
+
+    private static readonly IConfiguration _configuration = new ConfigurationBuilder()
+                                            .SetBasePath(_providersPath)
+                                            .AddJsonFile("Providers.json", optional: false, reloadOnChange: true)
+                                            .Build();
     public static IServiceCollection AddStructorAuthServices(this IServiceCollection services, Action<AuthOptions>? configureOptions = null)
     {        
 
         return services;
     }
+
+    #region Jwt
     public static IServiceCollection AddStructorJwtAuth(this IServiceCollection services, Action<JwtOptions> jwtAction )
     {
         services.Configure(jwtAction);
@@ -48,6 +53,7 @@ public static class StructorAuthServicesCollection
     }
     private static IServiceCollection AddStructorJwtAuth(this IServiceCollection services, JwtOptions jwtOptions)
     {
+        services.AddScoped<IJWTService, JWTService>();
 
         services.AddAuthentication(options =>
         {
@@ -129,38 +135,68 @@ public static class StructorAuthServicesCollection
 
         swaggerGenOptions.SwaggerGeneratorOptions.SecurityRequirements.Add(securityRequirment);
     }
+    #endregion
 
+    #region OAuth
     public static IServiceCollection AddStructorOAuth(this IServiceCollection services)
     {
         services.AddScoped<IOAuthService, OAuthService>();
 
         return services;
     }
-    public static IServiceCollection AddGithubOAuth(this IServiceCollection services, Action<OAuthOptions> githubOptions)
+    public static IServiceCollection AddGithubOAuth(this IServiceCollection services, Action<OAuthOptions> optionsActions)
     {
-        IConfiguration _configuration = new ConfigurationBuilder()
-                                            .SetBasePath(_providersPath)
-                                            .AddJsonFile("Github.json", optional: false, reloadOnChange: true)
-                                            .Build();
-
-        OAuthOptions options = new()
-        {
-            OAuthProvider = OAuthProvider.Github,
-            AuthorizationEndpoint = _configuration.GetValue<string>("AuthorizationEndpoint") ?? throw new NullReferenceException("AuthorizationEndpoint is required."),
-            TokenEndpoint = _configuration.GetValue<string>("TokenEndpoint") ?? throw new NullReferenceException("TokenEndpoint is required."),
-            UserInformationEndpoint = _configuration.GetValue<string>("UserInformationEndpoint") ?? throw new NullReferenceException("UserInformationEndpoint is required."),
-            Scope = _configuration.GetValue<string>("Scope") ?? throw new NullReferenceException("Scope is required."),
-            DataProtectionSecret = _configuration.GetValue<string>("DataProtectionSecret") ?? throw new NullReferenceException("DataProtectionSecret is required."),
-
-        };
-        githubOptions(options);
-
-        services.Configure<OAuthOptions>(OAuthProvider.Github.ToString(), githubOptions);
-        
+        services.AddOAuthProvider(OAuthProvider.Github, optionsActions);
+        return services;
+    }
+    public static IServiceCollection AddGoogleOAuth(this IServiceCollection services, Action<OAuthOptions> optionsActions)
+    {
+        services.AddOAuthProvider(OAuthProvider.Google, optionsActions);
         return services;
     }
 
+    private static IServiceCollection AddOAuthProvider(this IServiceCollection services, OAuthProvider oAuthProvider, Action<OAuthOptions> optionsActions)
+    {
+        var provider = oAuthProvider.ToString();
+        var options = GetOAuthConfiguration(oAuthProvider, _configuration.GetSection(provider));
 
+        optionsActions(options);
+
+        services.Configure<OAuthOptions>(provider, obj =>
+        {
+            obj.ClientId = options.ClientId;
+            obj.ClientSecret = options.ClientSecret;
+            obj.RedirectUrl = options.RedirectUrl;
+            obj.AuthorizationEndpoint = options.AuthorizationEndpoint;
+            obj.TokenEndpoint = options.TokenEndpoint;
+            obj.UserInformationEndpoint = options.UserInformationEndpoint;
+            obj.Scope = options.Scope;
+            obj.CallbackUrl = options.CallbackUrl;
+            obj.DataProtector = options.DataProtector;
+            obj.DataProtectionSecret = options.DataProtectionSecret;
+            obj.OAuthProvider = options.OAuthProvider;
+        });
+
+        //services.AddSingleton<IOptionsMonitor<OAuthOptions>>(IOptionsFactory<OAuthOptions>);
+
+        return services;
+    }
+
+    private static OAuthOptions GetOAuthConfiguration(OAuthProvider oAuthProvider, IConfigurationSection configurationSection)
+    {
+        OAuthOptions options = new()
+        {
+            OAuthProvider = oAuthProvider,
+            AuthorizationEndpoint = configurationSection.GetValue<string>("AuthorizationEndpoint") ?? throw new NullReferenceException("AuthorizationEndpoint is required."),
+            TokenEndpoint = configurationSection.GetValue<string>("TokenEndpoint") ?? throw new NullReferenceException("TokenEndpoint is required."),
+            UserInformationEndpoint = configurationSection.GetValue<string>("UserInformationEndpoint") ?? throw new NullReferenceException("UserInformationEndpoint is required."),
+            Scope = configurationSection.GetValue<string>("Scope") ?? throw new NullReferenceException("Scope is required."),
+        };
+
+        return options;
+    }
+
+    #endregion
     //public static IServiceCollection AddStructorJwtAuth(this IServiceCollection services, Action<JWTOptions> configureOptions)
     //{
     //    services.AddScoped<IJWTService, JWTService>();
@@ -307,16 +343,16 @@ public static class StructorAuthServicesCollection
         }
     */
 
-        //public static AuthenticationBuilder AddOAuthProvidersConfig(this AuthenticationBuilder authBuilder)
-        //{
-        //    authBuilder.AddCookie("provider", options =>
-        //    {
-        //        options.LoginPath = "/login";
-        //        options.LogoutPath = "/logout";
-        //    });
+    //public static AuthenticationBuilder AddOAuthProvidersConfig(this AuthenticationBuilder authBuilder)
+    //{
+    //    authBuilder.AddCookie("provider", options =>
+    //    {
+    //        options.LoginPath = "/login";
+    //        options.LogoutPath = "/logout";
+    //    });
 
-        //    return authBuilder;
-        //}
-    }
+    //    return authBuilder;
+    //}
+}
 
 

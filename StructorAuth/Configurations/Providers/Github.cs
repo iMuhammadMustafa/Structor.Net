@@ -3,6 +3,7 @@ using Structor.Auth.Configurations;
 using Structor.Auth.Enums;
 
 namespace Structor.Auth.Config.Providers;
+[Obsolete]
 internal static class Github
 {
     public static string ClientId = null!;
