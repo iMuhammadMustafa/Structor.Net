@@ -4,11 +4,11 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
-using Structor.Auth.Entities;
+using Microsoft.Extensions.Options;
+using Structor.Auth.Configurations;
 using Structor.Auth.Enums;
-using StructorAuth.Config.Providers;
 
-namespace StructorAuth.Services;
+namespace Structor.Auth.Services;
 
 public interface IOAuthService
 {
@@ -20,11 +20,12 @@ public class OAuthService : IOAuthService
 {
 
     private readonly IDataProtectionProvider _protectionProvider;
+    private readonly OAuthOptions _gitHubOptions;
 
-    public OAuthService(IDataProtectionProvider protectionProvider)
+    public OAuthService(IDataProtectionProvider protectionProvider, IOptionsSnapshot<OAuthOptions> oAuthOptions)
     {
         _protectionProvider = protectionProvider;
-
+        _gitHubOptions = oAuthOptions.Get(OAuthProvider.Github.ToString());
     }
     public async Task<JsonNode> HandleProviderCallback(string providerString, string code, string state)
     {
@@ -62,39 +63,26 @@ public class OAuthService : IOAuthService
     }
 
 
-    private OAuthProvidersEnum GetProviderEnum(string provider)
+    private OAuthProvider GetProviderEnum(string provider)
     {
-        if (!Enum.TryParse(provider, ignoreCase: true, out OAuthProvidersEnum oAuthProvider))
+        if (!Enum.TryParse(provider, ignoreCase: true, out OAuthProvider oAuthProvider))
         {
             throw new BadHttpRequestException("Not a valid Provider");
         }
 
         return oAuthProvider;
     }
-    private OAuthOptions GetProviderData(OAuthProvidersEnum provider)
+    private OAuthOptions GetProviderData(OAuthProvider provider)
     {
-        OAuthOptions oAuthOptions = new();
         switch (provider)
         {
-            case OAuthProvidersEnum.Github:
+            case OAuthProvider.Github:
                 {
-                    oAuthOptions.ClientId = Github.ClientId;
-                    oAuthOptions.ClientSecret = Github.ClientSecret;
-                    oAuthOptions.AuthorizationEndpoint = Github.AuthorizationEndpoint;
-                    oAuthOptions.TokenEndpoint = Github.TokenEndpoint;
-                    oAuthOptions.UserInformationEndpoint = Github.UserInformationEndpoint;
-                    oAuthOptions.CallbackUrl = Github.CallbackUrl;
-                    oAuthOptions.RedirectUrl = Github.RedirectUrl;
-                    oAuthOptions.Scope = Github.Scope;
-                    oAuthOptions.DataProtector = Github.DataProtector;
-                    oAuthOptions.DataProtectionSecret = Github.DataProtectionSecret;
-                    break;
+                    return _gitHubOptions;
                 }
             default:
                 throw new BadHttpRequestException("Not a valid Provider");
         }
-
-        return oAuthOptions;
     }
 
     private bool ValidateState(string dataProtector, string stateSecret, string state)

@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Xunit;
 
-namespace StructorAuth.Helpers;
+namespace Structor.Auth.Helpers;
 public class AuthenticationUtilsTests
 {
 

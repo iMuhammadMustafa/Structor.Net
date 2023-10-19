@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace StructorAuth.Helpers;
+namespace Structor.Auth.Helpers;
 public static class AuthenticationUtils
 {
     private const int IterationsCount = 10000;

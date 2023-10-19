@@ -1,16 +1,21 @@
 ﻿namespace Structor.Infrastructure.DTOs.REST;
 
-public class IResponse<T>
+public class Response<T>
 {
     public T? Data { get; set; }
-    public int StatusCode { get; set; } = 200;
-    public ResponseStatus Status { get; set; }
     public object? Error { get; set; }
-    public string? Message { get; set; }
-    public IPagination? Pagination { get; set; }
+    public string? ErrorMessage { get; set; }
+    public ResponseStatus Status { get; set; }
+    public int StatusCode { get; set; } = 200;
+    public Pagination? Pagination { get; set; }
+
+    //public static implicit operator T(Response<T> response) => response.Data;
+    //public static implicit operator string(Response<T> response) => response.Status.ToString();
+    //public static explicit operator Exception(Response<T> response) => response.Error;
+    //public static explicit operator int(Response<T> response) => response.StatusCode;
 
 
-    public IResponse<T> WithData(T data, int statusCode = 200)
+    public Response<T> WithData(T data, int statusCode = 200)
     {
         Data = data;
 
@@ -18,41 +23,44 @@ public class IResponse<T>
         Status = ResponseStatus.Success;
         return this;
     }
-    public IResponse<T> WithPagination(IPagination pagination)
+    public Response<T> WithPagination(Pagination pagination)
     {
         Pagination = pagination;
         return this;
     }
-    public IResponse<T> WithError(object error, int statusCode = 500)
+    public Response<T> WithError(Exception? error  = null, int statusCode = 500)
     {
-        Status = ResponseStatus.Failure;
         Error = error;
+        Status = ResponseStatus.Failure;
         StatusCode = statusCode;
         return this;
     }
-    public IResponse<T?> WithMessage(string message)
+    public Response<T?> WithError(string message, int statusCode = 500)
     {
-        Message = message;
+        ErrorMessage = message;
+        Status = ResponseStatus.Failure;
+        StatusCode = statusCode;
+
         return this;
     }
-    public IResponse<T> WithStatusCode(int statusCode)
+    public Response<T> WithStatusCode(int statusCode)
     {
         StatusCode = statusCode;
         return this;
     }
-    public IResponse<T> WithSuccess()
+    public Response<T> WithSuccess()
     {
         Status = ResponseStatus.Success;
         return this;
     }
-    public IResponse<T> WithFailure()
+    public Response<T> WithFailure()
     {
         Status = ResponseStatus.Failure;
         return this;
     }
 }
 
-public class IPagination
+public class Pagination
 {
     private int _pageNumber;
     private int _pageSize;
@@ -95,22 +103,22 @@ public enum ResponseStatus
 
 //public static class IResponseExtensions
 //{
-//    public static IResponse<T> WithData<T>(this IResponse<T> response, T data) where T : class
+//    public static Response<T> WithData<T>(this Response<T> response, T data) where T : class
 //    {
 //        response.Data = data;
 //        return response;
 //    }
-//    public static IResponse<T> WithSuccess<T>(this IResponse<T> response) where T : class
+//    public static Response<T> WithSuccess<T>(this Response<T> response) where T : class
 //    {
 //        response.Status = "Success";
 //        return response;
 //    }
-//    public static IResponse<T> WithFailure<T>(this IResponse<T> response) where T : class
+//    public static Response<T> WithFailure<T>(this Response<T> response) where T : class
 //    {
 //        response.Status = "Failure";
 //        return response;
 //    }
-//    public static IResponse<T> WithError<T>(this IResponse<T> response, object error) where T : class
+//    public static Response<T> WithError<T>(this Response<T> response, object error) where T : class
 //    {
 //        response.Error = error;
 //        return response;

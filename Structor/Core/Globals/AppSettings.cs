@@ -1,4 +1,4 @@
-﻿namespace Structor.Infrastructure.Globals;
+﻿namespace Structor.Core.Globals;
 
 public static class AppSettings
 {

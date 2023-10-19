@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Structor.Auth;
+using Structor.Auth.Configurations;
 using Structor.Features.Users;
 using Structor.Infrastructure;
 using System.Text.Json.Serialization;
@@ -12,24 +13,17 @@ public static class CoreServicesCollection
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDefaultServices();
-        services.AddSwaggerConfig();
+        
+        services.AddInfrastructureServices(configuration);
 
         services.AddFeaturesServices(configuration);
+
+        services.AddExternalServices(configuration);
 
         services.AddAuthenticationServices(configuration);
 
         return services;
     }
-
-    public static IServiceCollection AddFeaturesServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddInfrastructureServices(configuration);
-        services.AddUsersServices(configuration);
-
-
-        return services;
-    }
-
     public static IServiceCollection AddDefaultServices(this IServiceCollection services)
     {
         services.AddControllers()
@@ -38,10 +32,10 @@ public static class CoreServicesCollection
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); //Stringify Enum in JSON
                 });
 
+        services.AddSwaggerConfig();
+
         return services;
     }
-
-
     public static IServiceCollection AddSwaggerConfig(this IServiceCollection services)
     {
         services.AddSwaggerGen(c =>
@@ -53,31 +47,42 @@ public static class CoreServicesCollection
         return services;
     }
 
-    public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration _configuration)
+    public static IServiceCollection AddFeaturesServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddUsersServices(configuration);
+
+        return services;
+    }
+
+    public static IServiceCollection AddExternalServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        return services;
+
+    }
+    public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        //var jwtConfigurations = configuration.GetSection("JWT").Get<JwtOptions>() ?? throw new NullReferenceException("No Configuration for Jwt available");
+        //services.AddStructorJwtAuth(options=>
+        //{
+        //    options.Issuer = jwtConfigurations.Issuer;
+        //    options.Audience = jwtConfigurations.Audience;
+
+        //    options.Keys = jwtConfigurations.Keys;
+        //    options.Durations = jwtConfigurations.Durations;
+
+        //    options.CookieHeaders = jwtConfigurations.CookieHeaders;
+        //})
+        var gitHubConfigurations = configuration.GetSection("Github").Get<OAuthOptions>() ?? throw new NullReferenceException("No Configuration for Github available");
 
         services.AddStructorAuthServices()
-                .AddStructorJwtAuth((options) =>
-                {
-                    options.Issuer = _configuration["JWT:Issuer"];
-                    options.Audience = _configuration["JWT:Audience"];
-
-                    options.AccessSecret = _configuration["JWT:Keys:Access"]!;
-                    options.AccessDuration = _configuration["JWT:Expiry:Access"];
-
-                    options.RefreshSecret = _configuration["JWT:Keys:Refresh"];
-                    options.RefreshDuration = _configuration["JWT:Expiry:Refresh"];
-
-                    options.AccessCookie = _configuration["JWT:Cookie:AccessHeader"];
-                    options.TokenExpiryHeader = _configuration["JWT:Cookie:ExpiryHeader"];
-                })
+                .AddStructorJwtAuth(configuration.GetSection("JWT"))
                 .AddStructorOAuth()
                 .AddGithubOAuth((options) =>
                 {
-                    options.ClientId = "200fc44a13e943d80325";
-                    options.ClientSecret = "0c5a30ad5ef0b17fbcad5a078b26f61d97b6e9dc";
-                    options.CallbackUrl = "https://localhost:5001/api/oauth/github/callback";
-                    
+                    options.ClientId = gitHubConfigurations.ClientId;
+                    options.ClientSecret = gitHubConfigurations.ClientSecret;
+                    options.CallbackUrl = gitHubConfigurations.CallbackUrl;
+                    options.DataProtectionSecret = gitHubConfigurations.DataProtectionSecret;
                 });
 
         return services;
@@ -249,30 +254,4 @@ Infrastructure
         //    options.Scope.Add("identity");
         //    options.SaveTokens = true;
 
-
-
-
-        //});
-
-        //.AddMicrosoftAccount(options =>
-        //{
-        //    options.ClientId = "0cd12960-1d7d-4fb8-8e05-73c32e370d2d";
-        //    options.ClientSecret = "v4r8Q~IGn7LKWelFMQ~Dl1GjpKGVm8Iq13uFTdeD";
-
-        //});
-        //.AddGoogle(options =>
-        //{
-        //    options.ClientId = "your-client-idzzzzzzz";
-        //    options.ClientSecret = "your-client-idzzzzzzz";
-        //});
-        //.AddOpenIdConnect(options =>
-        //{
-        //    options.Authority = "localhost";
-        //    options.ClientId = "your-client-idzzzzzzz";
-        //    options.ClientSecret = "your-client-secretzzzzzzz";
-        //    options.ResponseType = "code";
-        //    options.Scope.Add("openid");
-        //    options.Scope.Add("profile");
-        //    options.SaveTokens = true;
-        //});
  */

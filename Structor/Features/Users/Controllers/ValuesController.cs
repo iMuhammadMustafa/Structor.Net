@@ -14,16 +14,16 @@ public class ValuesController : ControllerBase
 
     // GET api/<ValuesController>/5
     [HttpGet("{id}")]
-    public ActionResult<IResponse<Test>> GetID(int id)
+    public ActionResult<Response<Test>> GetID(int id)
     {
         var test = new Test()
         {
             ID = id
         };
-        var res = new IResponse<Test>();
+        var res = new Response<Test>();
 
         res.WithData(test)
-            .WithPagination(new IPagination
+            .WithPagination(new Pagination
             {
                 Page = 1,
                 Size = 10,
@@ -36,14 +36,14 @@ public class ValuesController : ControllerBase
     }
 
     [HttpGet("IDA")]
-    public ActionResult<IResponse<Test>> GetIDA(int id)
+    [AllowAnonymous]
+    public ActionResult<Response<Test>> GetIDA(int id)
     {
         var test = new Test()
         {
             ID = id
         };
-        var res = new IResponse<Test>().WithData(test, 201);
-
+        var res = new Response<Test>().WithData(test, 201);
 
         throw new DirectoryNotFoundException();
     }

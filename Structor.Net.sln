@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3CA77A80-28F6-4EF3-AF12-0AFF4E9E9867}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		README.md = README.md
 	EndProjectSection
 EndProject

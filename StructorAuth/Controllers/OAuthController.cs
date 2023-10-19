@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Structor.Auth.Enums;
-using StructorAuth.Config.Providers;
-using StructorAuth.Services;
+using Structor.Auth.Services;
+using Structor.Auth.Config.Providers;
 
-namespace StructorAuth.Controllers;
+namespace Structor.Auth.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]

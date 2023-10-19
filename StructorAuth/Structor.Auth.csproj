@@ -1,49 +1,37 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<UserSecretsId>8b12a798-abdf-4af2-86bb-8f67a091b7ff</UserSecretsId>
+    <UserSecretsId>8b12a798-abdf-4af2-86bb-8f67a091b7ff</UserSecretsId>
   </PropertyGroup>
 
+	
   <ItemGroup>
-    <None Remove="Config\appsettings.json" />
-    <None Remove="Config\Providers\Github.json" />
+    <EmbeddedResource Include="Configurations\Providers\Github.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Config\appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Config\Providers\Github.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-	
-	
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="7.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
+
+	<ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.12" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
   </ItemGroup>
-	
-	
-  <ItemGroup>
-    <None Update="Config\Providers\Facebook.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-	
-	
-  <ProjectExtensions><VisualStudio><UserProperties config_4providers_4facebook_1json__JsonSchema="" config_4providers_4github_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
+
+	<ItemGroup>
+	  <Folder Include="Entities\" />
+	</ItemGroup>
+
+
 
 </Project>

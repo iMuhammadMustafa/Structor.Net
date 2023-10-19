@@ -7,10 +7,7 @@ public static class CoreAppCollection
 
     public static WebApplication UseCoreApp(this WebApplication app)
     {
-
         app.UseMiddleware<GlobalExceptionsMiddleware>();
-
-
 
         app.UseFeaturesServices();
         app.UseSwagger();

@@ -1,16 +1,14 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Structor.Auth.Configurations;
 using Structor.Auth.DTOs;
-using StructorAuth.Config;
 
-namespace StructorAuth.Services;
-public enum JWTEnum
-{
-    Access,
-    Refresh
-}
+namespace Structor.Auth.Services;
+
 public interface IJWTService
 {
     JwtDto GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null);
@@ -18,12 +16,35 @@ public interface IJWTService
 }
 public class JWTService : IJWTService
 {
-    private readonly string Issuer = JWTSettings.Issuer;
-    private readonly string Audience = JWTSettings.Audience;
-    private readonly string AccessSecret = JWTSettings.AccessSecret;
-    private readonly string AccessDuration = JWTSettings.AccessDuration;
-    private readonly string RefreshSecret = JWTSettings.RefreshSecret;
-    private readonly string RefreshDuration = JWTSettings.RefreshDuration;
+    private readonly ILogger<JWTService> _logger;
+    private readonly JwtOptions _jwt;
+    private readonly string Issuer;
+    private readonly string Audience;
+    private readonly string AccessSecret;
+    private readonly string AccessDuration;
+    private readonly string RefreshSecret;
+    private readonly string RefreshDuration;
+
+    public JWTService(IOptions<JwtOptions> jwtOptions, ILogger<JWTService> logger)
+    {
+        _logger = logger;
+        _jwt = jwtOptions.Value;
+
+        if (_jwt == null)
+        {
+            _logger.LogError("Jwt Isn't correctly instanciated");
+            throw new NullReferenceException("Jwt Isn't correctly instanciated");
+        }
+
+        Issuer = _jwt.Issuer;
+        Audience = _jwt.Audience;
+        AccessSecret = _jwt.Keys.Access;
+        AccessDuration = _jwt.Durations.Access;
+        RefreshSecret = _jwt.Keys.Refresh;
+        RefreshDuration = _jwt.Durations.Refresh;
+
+
+    }
 
 
     public JwtDto GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null)

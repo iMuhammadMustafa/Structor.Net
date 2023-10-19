@@ -1,37 +1,53 @@
-﻿using System.Reflection;
+﻿using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Structor.Auth.Entities;
-using StructorAuth.Config;
-using StructorAuth.Config.Providers;
-using StructorAuth.Services;
+using Structor.Auth.Config;
+using Structor.Auth.Config.Providers;
+using Structor.Auth.Configurations;
+using Structor.Auth.Enums;
+using Structor.Auth.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Structor.Auth;
 
 public static class StructorAuthServicesCollection
 {
-    private static string _providersPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Config\\Providers";
+    private static string _providersPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Configurations/Providers";
     public static IServiceCollection AddStructorAuthServices(this IServiceCollection services, Action<AuthOptions>? configureOptions = null)
     {        
 
         return services;
     }
-
-
-    public static IServiceCollection AddStructorJwtAuth(this IServiceCollection services, Action<JWTOptions> configureOptions)
+    public static IServiceCollection AddStructorJwtAuth(this IServiceCollection services, Action<JwtOptions> jwtAction )
     {
-        services.AddScoped<IJWTService, JWTService>();
+        services.Configure(jwtAction);
 
-        JWTOptions jWTOptions = new();
-        configureOptions(jWTOptions);
-        JWTSettings.Initialize(jWTOptions);
+        JwtOptions jwtOptions = new();
+        jwtAction(jwtOptions);
 
+        services.AddStructorJwtAuth(jwtOptions);
+
+        return services;
+    }
+    public static IServiceCollection AddStructorJwtAuth(this IServiceCollection services, IConfiguration jwtOptionsSection)
+    {
+        JwtOptions jwtOptions = jwtOptionsSection.Get<JwtOptions>() ?? throw new NullReferenceException("Jwt Configuration Settings is not available, please add it.");
+
+        services.Configure<JwtOptions>(jwtOptionsSection);
+
+        services.AddStructorJwtAuth(jwtOptions);
+
+        return services;
+    }
+    private static IServiceCollection AddStructorJwtAuth(this IServiceCollection services, JwtOptions jwtOptions)
+    {
 
         services.AddAuthentication(options =>
         {
@@ -44,37 +60,41 @@ public static class StructorAuthServicesCollection
             options.Events = new JwtBearerEvents();
 
             //Read AccessToken From Cookie 
-            if (jWTOptions.SetAccessInCookie && !string.IsNullOrWhiteSpace(jWTOptions.AccessCookie))
+            if (!string.IsNullOrWhiteSpace(jwtOptions.CookieHeaders?.AccessHeader))
             {
                 options.Events.OnMessageReceived = context =>
                 {
-                    context.Token = context.Request.Cookies[jWTOptions.AccessCookie];
+                    context.Token = context.Request.Cookies[jwtOptions.CookieHeaders.AccessHeader];
                     return Task.CompletedTask;
                 };
             }
             //Put AccessToken Is Expired In Header
-            if (jWTOptions.SetTokenExpiryHeader && !string.IsNullOrWhiteSpace(jWTOptions.TokenExpiryHeader))
+            if (!string.IsNullOrWhiteSpace(jwtOptions.CookieHeaders?.AccessExpiryHeader))
             {
                 options.Events.OnAuthenticationFailed = context =>
                 {
                     if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                     {
-                        context.Response.Headers.Append(jWTOptions.TokenExpiryHeader, "true");
+                        context.Response.Headers.Append(jwtOptions.CookieHeaders.AccessExpiryHeader, "true");
                     }
                     return Task.CompletedTask;
                 };
             }
 
+            if (jwtOptions.Keys == null)
+            {
+                throw new NullReferenceException("Jwt Keys are required to be set.");
+            }
 
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = jWTOptions.ValidateIssuer,
-                ValidateAudience = jWTOptions.ValidateAudience,
-                ValidateLifetime = jWTOptions.ValidateLifetime,
-                ValidateIssuerSigningKey = jWTOptions.ValidateIssuerSigningKey,
-                ValidIssuer = jWTOptions.Issuer,
-                ValidAudience = jWTOptions.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jWTOptions.AccessSecret ?? ""))
+                ValidateIssuer = jwtOptions.ValidateIssuer,
+                ValidateAudience = jwtOptions.ValidateAudience,
+                ValidateLifetime = jwtOptions.ValidateLifetime,
+                ValidateIssuerSigningKey = jwtOptions.ValidateIssuerSigningKey,
+                ValidIssuer = jwtOptions.Issuer,
+                ValidAudience = jwtOptions.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Keys.Access))
             };
         });
 
@@ -94,7 +114,6 @@ public static class StructorAuthServicesCollection
             BearerFormat = "JWT",
             Scheme = "Bearer"
         };
-
         swaggerGenOptions.SwaggerGeneratorOptions.SecuritySchemes.Add(securitySchemeName, securityScheme);
 
         var securityRequirment = new OpenApiSecurityRequirement
@@ -117,22 +136,88 @@ public static class StructorAuthServicesCollection
 
         return services;
     }
-
-
     public static IServiceCollection AddGithubOAuth(this IServiceCollection services, Action<OAuthOptions> githubOptions)
     {
         IConfiguration _configuration = new ConfigurationBuilder()
                                             .SetBasePath(_providersPath)
                                             .AddJsonFile("Github.json", optional: false, reloadOnChange: true)
                                             .Build();
-        Github.Initialize(_configuration);
 
+        OAuthOptions options = new()
+        {
+            OAuthProvider = OAuthProvider.Github,
+            AuthorizationEndpoint = _configuration.GetValue<string>("AuthorizationEndpoint") ?? throw new NullReferenceException("AuthorizationEndpoint is required."),
+            TokenEndpoint = _configuration.GetValue<string>("TokenEndpoint") ?? throw new NullReferenceException("TokenEndpoint is required."),
+            UserInformationEndpoint = _configuration.GetValue<string>("UserInformationEndpoint") ?? throw new NullReferenceException("UserInformationEndpoint is required."),
+            Scope = _configuration.GetValue<string>("Scope") ?? throw new NullReferenceException("Scope is required."),
+            DataProtectionSecret = _configuration.GetValue<string>("DataProtectionSecret") ?? throw new NullReferenceException("DataProtectionSecret is required."),
 
-        OAuthOptions options = new();
+        };
         githubOptions(options);
-        Github.Initialize(options);
+
+        services.Configure<OAuthOptions>(OAuthProvider.Github.ToString(), githubOptions);
+        
         return services;
     }
+
+
+    //public static IServiceCollection AddStructorJwtAuth(this IServiceCollection services, Action<JWTOptions> configureOptions)
+    //{
+    //    services.AddScoped<IJWTService, JWTService>();
+
+    //    JWTOptions jWTOptions = new();
+    //    configureOptions(jWTOptions);
+    //    JWTSettings.Initialize(jWTOptions);
+
+
+    //    services.AddAuthentication(options =>
+    //    {
+    //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    //        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    //    })
+    //    .AddJwtBearer(options =>
+    //    {
+    //        options.Events = new JwtBearerEvents();
+
+    //        //Read AccessToken From Cookie 
+    //        if (jWTOptions.SetAccessInCookie && !string.IsNullOrWhiteSpace(jWTOptions.AccessCookie))
+    //        {
+    //            options.Events.OnMessageReceived = context =>
+    //            {
+    //                context.Token = context.Request.Cookies[jWTOptions.AccessCookie];
+    //                return Task.CompletedTask;
+    //            };
+    //        }
+    //        //Put AccessToken Is Expired In Header
+    //        if (jWTOptions.SetTokenExpiryHeader && !string.IsNullOrWhiteSpace(jWTOptions.TokenExpiryHeader))
+    //        {
+    //            options.Events.OnAuthenticationFailed = context =>
+    //            {
+    //                if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+    //                {
+    //                    context.Response.Headers.Append(jWTOptions.TokenExpiryHeader, "true");
+    //                }
+    //                return Task.CompletedTask;
+    //            };
+    //        }
+
+
+    //        options.TokenValidationParameters = new TokenValidationParameters
+    //        {
+    //            ValidateIssuer = jWTOptions.ValidateIssuer,
+    //            ValidateAudience = jWTOptions.ValidateAudience,
+    //            ValidateLifetime = jWTOptions.ValidateLifetime,
+    //            ValidateIssuerSigningKey = jWTOptions.ValidateIssuerSigningKey,
+    //            ValidIssuer = jWTOptions.Issuer,
+    //            ValidAudience = jWTOptions.Audience,
+    //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jWTOptions.AccessSecret ?? ""))
+    //        };
+    //    });
+
+
+    //    return services;
+    //}
     //public static IServiceCollection AddFacebookOAuth(this IServiceCollection services, Action<OAuthOptions> facebookOptions)
     //{
     //    IConfiguration _configuration = new ConfigurationBuilder()

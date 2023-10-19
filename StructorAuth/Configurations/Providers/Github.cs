@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Structor.Auth.Entities;
+using Structor.Auth.Configurations;
 using Structor.Auth.Enums;
 
-namespace StructorAuth.Config.Providers;
+namespace Structor.Auth.Config.Providers;
 internal static class Github
 {
     public static string ClientId = null!;
@@ -16,7 +16,7 @@ internal static class Github
     public static string CallbackUrl = null!;
     public static string RedirectUrl = null!;
     public static string Scope = null!;
-    public static string DataProtector = OAuthProvidersEnum.Github.ToString();
+    public static string DataProtector = OAuthProvider.Github.ToString();
     public static string DataProtectionSecret = null!;
 
     public static void Initialize(IConfiguration configuration)
@@ -28,7 +28,7 @@ internal static class Github
         {
             ClientId = githubConfig.GetValue<string>("ClientId") ?? throw new NullReferenceException("ClientId is required.");
             ClientSecret = githubConfig.GetValue<string>("ClientSecret") ?? throw new NullReferenceException("ClientSecret is required.");
-            RedirectUrl = githubConfig.GetValue<string>("RedirectUrl") ?? throw new NullReferenceException("RedirectUrl is required.");
+            //RedirectUrl = githubConfig.GetValue<string>("RedirectUrl") ?? throw new NullReferenceException("RedirectUrl is required.");
             CallbackUrl = githubConfig.GetValue<string>("CallbackUrl") ?? throw new NullReferenceException("CallbackUrl is required.");
         }
 
@@ -40,7 +40,7 @@ internal static class Github
 
         //CallbackBase = githubConfig.GetValue<string>("CallbackBase") ?? throw new NullReferenceException("CallbackBase is required.");
         //CallbackPath = githubConfig.GetValue<string>("CallbackPath") ?? throw new NullReferenceException("CallbackPath is required.");
-        
+
         //CallbackUrl = CallbackBase + CallbackPath;
     }
 
@@ -48,19 +48,19 @@ internal static class Github
     {
         ClientId = oAuthOptions.ClientId ?? throw new NullReferenceException("ClientId is required.");
         ClientSecret = oAuthOptions.ClientSecret ?? throw new NullReferenceException("ClientSecret is required.");
-        RedirectUrl = oAuthOptions.RedirectUrl ?? RedirectUrl ?? throw new NullReferenceException("RedirectUrl is required.");
-        RedirectUrl = RedirectUrl.Replace("provider", OAuthProvidersEnum.Github.ToString());
+        //RedirectUrl = oAuthOptions.RedirectUrl ?? RedirectUrl ?? throw new NullReferenceException("RedirectUrl is required.");
+        //RedirectUrl = RedirectUrl.Replace("provider", OAuthProvidersEnum.Github.ToString());
 
         CallbackUrl = oAuthOptions.CallbackUrl ?? CallbackUrl ?? throw new NullReferenceException("CallbackUrl is required.");
-        CallbackUrl = CallbackUrl.Replace("provider", OAuthProvidersEnum.Github.ToString());
+        CallbackUrl = CallbackUrl.Replace("provider", OAuthProvider.Github.ToString());
 
         AuthorizationEndpoint = oAuthOptions.AuthorizationEndpoint ?? AuthorizationEndpoint ?? throw new NullReferenceException("AuthorizationEndpoint is required.");
         TokenEndpoint = oAuthOptions.TokenEndpoint ?? TokenEndpoint ?? throw new NullReferenceException("TokenEndpoint is required.");
         UserInformationEndpoint = oAuthOptions.UserInformationEndpoint ?? UserInformationEndpoint ?? throw new NullReferenceException("UserInformationEndpoint is required.");
         Scope = oAuthOptions.Scope ?? Scope ?? throw new NullReferenceException("Scope is required.");
         DataProtectionSecret = oAuthOptions.DataProtectionSecret ?? DataProtectionSecret ?? throw new NullReferenceException("DataProtectionSecret is required.");
-        
-        
+
+
         //CallbackBase = oAuthOptions.CallbackBase ?? CallbackBase ?? throw new NullReferenceException("CallbackBase is required.");
         //CallbackPath = oAuthOptions.CallbackPath ?? CallbackPath ?? throw new NullReferenceException("CallbackPath is required.");
 

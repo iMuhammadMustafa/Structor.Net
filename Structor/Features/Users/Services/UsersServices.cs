@@ -1,11 +1,13 @@
 ﻿using Structor.Auth.DTOs;
 using Structor.Features.Users.Entities;
 using Structor.Features.Users.Repositories;
-using StructorAuth.Config;
-using StructorAuth.Helpers;
-using StructorAuth.Services;
+using Structor.Auth.Config;
+using Structor.Auth.Helpers;
+using Structor.Auth.Services;
 using System.Net;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.Options;
+using Structor.Auth.Configurations;
 
 namespace Structor.Features.Users.Services;
 
@@ -14,12 +16,14 @@ public class UsersServices : IUsersServices
     private readonly IUserRepository _userRepository;
     private readonly IJWTService _jWTService;
     private readonly IOAuthService _oAuthService;
+    private readonly IOptions<JwtOptions> _options;
 
-    public UsersServices(IUserRepository userRepository, IJWTService jWTService, IOAuthService oAuthService)
+    public UsersServices(IUserRepository userRepository, IJWTService jWTService, IOAuthService oAuthService, IOptions<JwtOptions> options)
     {
         _userRepository = userRepository;
         _jWTService = jWTService;
         _oAuthService = oAuthService;
+        _options = options;
     }
 
 
@@ -117,7 +121,7 @@ public class UsersServices : IUsersServices
         {
             HttpOnly = true,
             Secure = true,
-            Expires = DateTime.Now.AddDays(double.Parse(JWTSettings.RefreshDuration)),
+            Expires = DateTime.Now.AddDays(double.Parse(_options.Value.Durations.Refresh)),
         };
 
         return cookie;
@@ -129,7 +133,7 @@ public class UsersServices : IUsersServices
             Path = "https://localhost:5001",
             HttpOnly = true,
             Secure = true,
-            Expires = DateTime.Now.AddDays(double.Parse(JWTSettings.AccessDuration)),
+            Expires = DateTime.Now.AddDays(double.Parse(_options.Value.Durations.Access)),
         };
 
         return cookie;

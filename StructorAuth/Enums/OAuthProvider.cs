@@ -1,5 +1,5 @@
 ﻿namespace Structor.Auth.Enums;
-public enum OAuthProvidersEnum
+public enum OAuthProvider
 {
     Local,
     Google,

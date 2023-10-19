@@ -7,7 +7,10 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
+COPY ["Directory.Build.props", "."]
+COPY ["Directory.Build.targets", "."]
 COPY ["Structor/Structor.csproj", "Structor/"]
+COPY ["StructorAuth/Structor.Auth.csproj", "StructorAuth/"]
 RUN dotnet restore "Structor/Structor.csproj"
 COPY . .
 WORKDIR "/src/Structor"
