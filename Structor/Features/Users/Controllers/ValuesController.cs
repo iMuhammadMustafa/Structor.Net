@@ -35,7 +35,31 @@ public class ValuesController : ControllerBase
         return res;
     }
 
-    [HttpGet("IDA")]
+
+    [HttpGet("{id}")]
+    [AllowAnonymous]
+    public ActionResult<Response<Test>> Get(int id)
+    {
+        var test = new Test()
+        {
+            ID = id
+        };
+        var res = new Response<Test>();
+
+        res.WithData(test)
+            .WithPagination(new Pagination
+            {
+                Page = 1,
+                Size = 10,
+                TotalPages = 10,
+                TotalCount = 10,
+            });
+
+
+        return res;
+    }
+
+    [HttpGet("{id}")]
     [AllowAnonymous]
     public ActionResult<Response<Test>> GetIDA(int id)
     {
@@ -43,9 +67,14 @@ public class ValuesController : ControllerBase
         {
             ID = id
         };
-        var res = new Response<Test>().WithData(test, 201);
+        var res = new Response<Test>().WithData(test, StatusCodes.Status201Created);
 
-        throw new DirectoryNotFoundException();
+
+        return CreatedAtAction(nameof(Get), new { id = id}, res);
+        //return Ok(res);
+
+
+        //throw new DirectoryNotFoundException();
     }
 
 }

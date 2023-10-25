@@ -11,6 +11,7 @@ namespace Structor.Auth.Services;
 
 public interface IJWTService
 {
+    string GenerateJWToken(Dictionary<string, string> _claims);
     JwtDto GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null);
     IEnumerable<Claim> ValidateToken(string token, JWTEnum tokenType = JWTEnum.Access);
 }
@@ -21,9 +22,9 @@ public class JWTService : IJWTService
     private readonly string Issuer;
     private readonly string Audience;
     private readonly string AccessSecret;
-    private readonly string AccessDuration;
+    private readonly int AccessDuration;
     private readonly string RefreshSecret;
-    private readonly string RefreshDuration;
+    private readonly int RefreshDuration;
 
     public JWTService(IOptions<JwtOptions> jwtOptions, ILogger<JWTService> logger)
     {
@@ -46,7 +47,11 @@ public class JWTService : IJWTService
 
     }
 
-
+    public string GenerateJWToken(Dictionary<string, string> _claims)
+    {
+        var accessClaims = GenerateClaims(_claims);
+        return GenerateToken(accessClaims, JWTEnum.Access),;
+    }
     public JwtDto GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null)
     {
         var accessClaims = GenerateClaims(_claims);
@@ -65,9 +70,9 @@ public class JWTService : IJWTService
     private string GenerateToken(IEnumerable<Claim> claims, JWTEnum keyType)
     {
         string Secret = keyType == JWTEnum.Access ? AccessSecret : RefreshSecret;
-        string Duration = keyType == JWTEnum.Access ? AccessDuration : RefreshDuration;
+        int Duration = keyType == JWTEnum.Access ? AccessDuration : RefreshDuration;
 
-        var expiry = keyType == JWTEnum.Access ? DateTime.UtcNow.AddMinutes(int.Parse(Duration)) : DateTime.UtcNow.AddDays(int.Parse(Duration));
+        var expiry = keyType == JWTEnum.Access ? DateTime.UtcNow.AddMinutes(Duration) : DateTime.UtcNow.AddDays(Duration);
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Secret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -75,7 +80,6 @@ public class JWTService : IJWTService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
     public IEnumerable<Claim> ValidateToken(string token, JWTEnum tokenType = JWTEnum.Access)
     {
         var secret = tokenType == JWTEnum.Access ? AccessSecret : RefreshSecret;
@@ -87,8 +91,8 @@ public class JWTService : IJWTService
                 token,
                 new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
+                    ValidateIssuer = _jwt.ValidateIssuer,
+                    ValidateAudience = _jwt.ValidateAudience,
                     ValidIssuer = Issuer,
                     ValidAudience = Audience,
                     ValidateLifetime = true,

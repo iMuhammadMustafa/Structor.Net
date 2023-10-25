@@ -12,7 +12,7 @@ public static class UsersServicesCollection
     public static IServiceCollection AddUsersServices(this IServiceCollection services, IConfiguration _configuration)
     {
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUsersServices, UsersServices>();
+        services.AddScoped<IUserServices, UserServices>();
 
 
         return services;

@@ -9,7 +9,65 @@ public static class AuthenticationUtils
     private const int KeySize = 32; // 256 bit
 
 
-    public static string GenerateRandomString(int length = 8, bool hasCapitalLetters = true, bool hasNumbers = true, bool hasSymbols = true)
+    public static string GenerateRandomRefresh(int length = 250, bool hasCapitalLetters = true, bool hasNumbers = true, bool hasSymbols = true)
+    {
+        string validChars = "abcdefghijklmnopqrstuvwxyz";
+        string capitalLetters = "ABCDEFGHJKLMNOPQRSTUVWXYZ";
+        string numbers = "0123456789";
+        string symbols = "!@#$%^&*?_-";
+
+
+        if (hasCapitalLetters)
+        {
+            validChars += capitalLetters;
+        }
+        if (hasNumbers)
+        {
+            validChars += numbers;
+        }
+        if (hasSymbols)
+        {
+            validChars += symbols;
+        }
+
+        Random random = new Random();
+        char[] chars = new char[length];
+
+
+
+        // Set the initial character types to false
+        bool hasNumber = false;
+        bool hasSymbol = false;
+        bool hasCapitalLetter = false;
+        for (int i = 0; i < length; i++)
+        {
+            char c = validChars[random.Next(0, validChars.Length)];
+            chars[i] = c;
+
+            if (!hasNumber & char.IsDigit(c)) hasNumber = true;
+            if (!hasSymbol & symbols.Contains(c)) hasSymbol = true;
+            if (!hasCapitalLetter & char.IsUpper(c)) hasCapitalLetter = true;
+
+        }
+        if (hasNumbers && !hasNumber)
+        {
+            // Replace a random character with a number
+            chars[random.Next(0, length)] = numbers[random.Next(0, numbers.Length)];
+        }
+        if (hasSymbols && !hasSymbol)
+        {
+            // Replace a random character with a symbol
+            chars[random.Next(0, length)] = symbols[random.Next(0, symbols.Length)];
+        }
+        if (hasCapitalLetters && !hasCapitalLetter)
+        {
+            // Replace a random character with a capital letter
+            chars[random.Next(0, length)] = capitalLetters[random.Next(0, capitalLetters.Length)];
+        }
+
+        return new string(chars);
+    }
+    public static string GenerateRandomString(int length = 250, bool hasCapitalLetters = true, bool hasNumbers = true, bool hasSymbols = true)
     {
         string validChars = "abcdefghijklmnopqrstuvwxyz";
         string capitalLetters = "ABCDEFGHJKLMNOPQRSTUVWXYZ";

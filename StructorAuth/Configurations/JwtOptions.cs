@@ -21,8 +21,8 @@ public class Keys
 }
 public class Duration
 {
-    public string Access { get; set; } = string.Empty;
-    public string Refresh { get; set; } = string.Empty;
+    public int Access { get; set; }
+    public int Refresh { get; set; } 
 }
 public class CookieHeader
 {

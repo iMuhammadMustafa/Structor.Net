@@ -12,7 +12,7 @@ public interface IRepository<TEntity> where TEntity : IEntity
     Task<int> Count();
     Task<int> CountWhere(Expression<Func<TEntity, bool>> expression);
 
-    Task<TEntity> FindFirst(Expression<Func<TEntity, bool>> expression);
+    Task<TEntity?> FindFirst(Expression<Func<TEntity, bool>> expression);
     Task<IEnumerable<TEntity>> FindAll(Expression<Func<TEntity, bool>> expression);
 
     Task<TEntity> Insert(TEntity entity, bool saveChanges = false);

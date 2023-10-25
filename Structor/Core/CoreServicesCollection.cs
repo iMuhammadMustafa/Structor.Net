@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.OpenApi.Models;
 using Structor.Auth;
 using Structor.Auth.Configurations;
+using Structor.Core.Configurations;
 using Structor.Features.Users;
 using Structor.Infrastructure;
 using System.Text.Json.Serialization;
@@ -13,7 +15,7 @@ public static class CoreServicesCollection
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDefaultServices();
-        
+
         services.AddInfrastructureServices(configuration);
 
         services.AddFeaturesServices(configuration);
@@ -26,6 +28,13 @@ public static class CoreServicesCollection
     }
     public static IServiceCollection AddDefaultServices(this IServiceCollection services)
     {
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1, 0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+        });
+
         services.AddControllers()
                 .AddJsonOptions(options =>
                 {
@@ -61,24 +70,11 @@ public static class CoreServicesCollection
     }
     public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        //var jwtConfigurations = configuration.GetSection("JWT").Get<JwtOptions>() ?? throw new NullReferenceException("No Configuration for Jwt available");
-        //services.AddStructorJwtAuth(options=>
-        //{
-        //    options.Issuer = jwtConfigurations.Issuer;
-        //    options.Audience = jwtConfigurations.Audience;
-
-        //    options.Keys = jwtConfigurations.Keys;
-        //    options.Durations = jwtConfigurations.Durations;
-
-        //    options.CookieHeaders = jwtConfigurations.CookieHeaders;
-        //})
-
-
-        var gitHubConfigurations = configuration.GetSection("Github").Get<OAuthOptions>() ?? throw new NullReferenceException("No Configuration for Github available");
-        var googleConfigurations = configuration.GetSection("Google").Get<OAuthOptions>() ?? throw new NullReferenceException("No Configuration for Github available");
+        var gitHubConfigurations = configuration.GetSection(ConfigurationNames.GITHUB).Get<OAuthOptions>() ?? throw new NullReferenceException("No Configuration for Github available");
+        var googleConfigurations = configuration.GetSection(ConfigurationNames.GOOGLE).Get<OAuthOptions>() ?? throw new NullReferenceException("No Configuration for Google available");
 
         services.AddStructorAuthServices()
-                .AddStructorJwtAuth(configuration.GetSection("JWT"))
+                .AddStructorJwtAuth(configuration.GetSection(ConfigurationNames.JWT))
                 .AddStructorOAuth()
                 .AddGithubOAuth((options) =>
                 {

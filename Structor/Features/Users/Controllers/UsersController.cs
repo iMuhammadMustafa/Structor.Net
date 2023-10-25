@@ -1,61 +1,39 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Structor.Auth.DTOs;
-using Structor.Core.Globals;
-using Structor.Features.Users.Entities;
 using Structor.Features.Users.Services;
 using Structor.Infrastructure.DTOs.REST;
 
 namespace Structor.Features.Users.Controllers;
 
-[Route("api/[controller]/[action]")]
 [ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]/[action]")]
 public class UsersController : ControllerBase
 {
-    private readonly IUsersServices _usersServices;
+    private readonly IUserServices _usersServices;
     private readonly IConfiguration _configuration;
 
-    public UsersController(IUsersServices usersServices, IConfiguration configuration)
+    public UsersController(IUserServices usersServices, IConfiguration configuration)
     {
         _usersServices = usersServices;
         _configuration = configuration;
     }
 
     [HttpPost]
-    [AllowAnonymous]
-    public async Task<ActionResult<Response<JwtDto>>> Register([FromBody] User newUser)
+    public async Task<ActionResult<Response<JwtDto>>> Register(NewUserDto newUser)
     {
 
-        var jwt = await _usersServices.Register(newUser);
+        var jwtResponse = await _usersServices.Register(newUser);
 
-        Response<JwtDto> response = new()
-        {
-            Data = jwt,
-            Status = ResponseStatus.Success,
-            StatusCode = 204,
-
-        };
-
-        return Ok(response);
+        return CreatedAtAction(nameof(Login), jwtResponse);
     }
 
     [HttpPost]
-    [AllowAnonymous]
     public async Task<ActionResult<Response<JwtDto>>> Login([FromBody] string username, string Password)
     {
+        var jwtResponse = await _usersServices.Login(username, Password);
 
-        var jwt = await _usersServices.Login(username, Password);
-
-        Response<JwtDto> response = new()
-        {
-            Data = jwt,
-            Status = ResponseStatus.Success,
-            StatusCode = 204,
-
-        };
-
-
-        return Ok(response);
+        return Ok(jwtResponse);
     }
 
     //[HttpPost]
@@ -65,50 +43,32 @@ public class UsersController : ControllerBase
     //    return Ok(_jWTService.ValidateToken(token, jWTEnum));
     //}
 
+    /// <summary>
+    /// Redirects user to the OAuth provider's login page to initiate the authentication flow.
+    /// </summary>
+    /// <param name="provider">The name of the OAuth provider to authenticate with.</param>
+    /// <returns>An <see cref="IActionResult"/> representing the result of the asynchronous operation.</returns>
+    ///1. Users clicks on Login With Google on the client => Redirect to api/oauth/provider/google
+    ///2. Api Redirects to Google's Login => User login 
+    ///3. Google Redirect to CallBackPath with code and state 
+    ///4. Api Verifies & Generates claims & Generates Token
+    ///5. Api Redirect to Client with the Tokens
     [HttpGet]
     [Route("{provider}")]
-    [AllowAnonymous]
     public IActionResult Login([FromRoute] string provider)
     {
-        var oAuthUrl = _configuration["OAuthUrl"];
-        if (oAuthUrl is null)
-        {
-            throw new NullReferenceException("OAuthUrl is not defined");
-        }
+        var redirectPath =  _usersServices.GetProviderRedirect(provider);
 
-        string oauthUrl = oAuthUrl.Replace("provider",provider); 
-
-        return Redirect(oauthUrl);
+        return Redirect(redirectPath);
     }
-
 
     [HttpGet]
-    [Route("~/api/oauth/{provider}/callback")]
-    public async Task<ActionResult<Response<JwtDto>>> ProviderCallBack([FromRoute] string provider, [FromQuery] string code, [FromQuery] string state)
+    [Route("{provider}")]
+    public async Task<ActionResult<Response<JwtDto>>> CallBack([FromRoute] string provider, [FromQuery] string code, [FromQuery] string state)
     {
-        var jwt = await _usersServices.HandleExternal(provider, code, state);
-
-        Response<JwtDto> response = new();
-        response.WithData(jwt);
-
-        return Ok(response);
-
+        var jwtResponse = await _usersServices.HandleExternal(provider, code, state);
+        return CreatedAtAction(nameof(Login), jwtResponse);
     }
-
-
-    //[HttpPost]
-    //[Route("{provider}")]
-    //[AllowAnonymous]
-    //public async Task<ActionResult<Response<JwtDto>>> ProviderRedirect([FromRoute] string provider, [FromBody] JsonNode content)
-    //{
-
-    //    var jwt = await _usersServices.HandleExternal(provider, content);
-
-    //    Response<JwtDto> response = new();
-    //    response.WithData(jwt);
-
-    //    return Ok(response);
-    //}
 
 
 

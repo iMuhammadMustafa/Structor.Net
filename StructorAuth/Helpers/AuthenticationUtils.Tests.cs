@@ -13,7 +13,7 @@ public class AuthenticationUtilsTests
     [InlineData(20, false, false, false)]
     public void GenerateRandomString_ShouldReturnStringWithExpectedLengthAndCharacters(int length, bool hasCapitalLetters, bool hasNumbers, bool hasSympols)
     {
-        var generatedString = AuthenticationUtils.GenerateRandomString(length, hasCapitalLetters, hasNumbers, hasSympols);
+        var generatedString = AuthenticationUtils.GenerateRandomRefresh(length, hasCapitalLetters, hasNumbers, hasSympols);
 
         generatedString.Length.Should().Be(length);
 

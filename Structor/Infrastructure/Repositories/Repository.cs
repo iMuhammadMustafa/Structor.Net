@@ -51,9 +51,9 @@ public abstract class Repository<TEntity, TContext> : IRepository<TEntity>
 
     public virtual async Task<int> CountWhere(Expression<Func<TEntity, bool>> expression) => await DbSet.Where(expression).CountAsync();
 
-    public virtual async Task<TEntity> FindFirst(Expression<Func<TEntity, bool>> expression)
+    public virtual async Task<TEntity?> FindFirst(Expression<Func<TEntity, bool>> expression)
     {
-        return await DbSet.Where(expression).FirstOrDefaultAsync();
+        return await DbSet.FirstOrDefaultAsync(expression);
     }
     public virtual async Task<IEnumerable<TEntity>> FindAll(Expression<Func<TEntity, bool>> expression)
     {

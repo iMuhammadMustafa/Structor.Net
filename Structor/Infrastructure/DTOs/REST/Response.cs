@@ -9,13 +9,12 @@ public class Response<T>
     public int StatusCode { get; set; } = 200;
     public Pagination? Pagination { get; set; }
 
-    //public static implicit operator T(Response<T> response) => response.Data;
-    //public static implicit operator string(Response<T> response) => response.Status.ToString();
-    //public static explicit operator Exception(Response<T> response) => response.Error;
-    //public static explicit operator int(Response<T> response) => response.StatusCode;
+    public static ResponseBuilder<T> Create()
+    {
+        return new ResponseBuilder<T>();
+    }
 
-
-    public Response<T> WithData(T data, int statusCode = 200)
+    public Response<T> WithData(T data, int statusCode = StatusCodes.Status200OK)
     {
         Data = data;
 
@@ -28,14 +27,14 @@ public class Response<T>
         Pagination = pagination;
         return this;
     }
-    public Response<T> WithError(Exception? error  = null, int statusCode = 500)
+    public Response<T> WithException(Exception? error = null, int statusCode = StatusCodes.Status500InternalServerError)
     {
         Error = error;
         Status = ResponseStatus.Failure;
         StatusCode = statusCode;
         return this;
     }
-    public Response<T?> WithError(string message, int statusCode = 500)
+    public Response<T> WithError(string message, int statusCode = StatusCodes.Status500InternalServerError)
     {
         ErrorMessage = message;
         Status = ResponseStatus.Failure;
@@ -53,13 +52,65 @@ public class Response<T>
         Status = ResponseStatus.Success;
         return this;
     }
-    public Response<T> WithFailure()
+
+
+}
+public class ResponseBuilder<T>
+{
+    private Response<T> _response;
+
+    public ResponseBuilder()
     {
-        Status = ResponseStatus.Failure;
+        _response = new Response<T>();
+    }
+    public ResponseBuilder<T> WithData(T data, int statusCode = StatusCodes.Status200OK)
+    {
+        _response.Data = data;
+
+        _response.StatusCode = statusCode;
+        _response.Status = ResponseStatus.Success;
         return this;
     }
-}
+    public ResponseBuilder<T> WithPagination(Pagination pagination)
+    {
+        _response.Pagination = pagination;
+        return this;
+    }
+    public ResponseBuilder<T> WithException(Exception? error = null, int statusCode = StatusCodes.Status500InternalServerError)
+    {
+        _response.Error = error;
+        _response.Status = ResponseStatus.Failure;
+        _response.StatusCode = statusCode;
+        return this;
+    }
+    public ResponseBuilder<T?> WithError(string message, int statusCode = StatusCodes.Status500InternalServerError)
+    {
+        _response.ErrorMessage = message;
+        _response.Status = ResponseStatus.Failure;
+        _response.StatusCode = statusCode;
 
+        return this;
+    }
+    public ResponseBuilder<T> WithStatusCode(int statusCode)
+    {
+        _response.StatusCode = statusCode;
+        return this;
+    }
+    public ResponseBuilder<T> WithSuccess()
+    {
+        _response.Status = ResponseStatus.Success;
+        return this;
+    }
+    public ResponseBuilder<T> WithFailure()
+    {
+        _response.Status = ResponseStatus.Failure;
+        return this;
+    }
+    public Response<T> Build()
+    {
+        return _response;
+    }
+}
 public class Pagination
 {
     private int _pageNumber;
@@ -100,28 +151,7 @@ public enum ResponseStatus
     Failure
 }
 
-
-//public static class IResponseExtensions
-//{
-//    public static Response<T> WithData<T>(this Response<T> response, T data) where T : class
-//    {
-//        response.Data = data;
-//        return response;
-//    }
-//    public static Response<T> WithSuccess<T>(this Response<T> response) where T : class
-//    {
-//        response.Status = "Success";
-//        return response;
-//    }
-//    public static Response<T> WithFailure<T>(this Response<T> response) where T : class
-//    {
-//        response.Status = "Failure";
-//        return response;
-//    }
-//    public static Response<T> WithError<T>(this Response<T> response, object error) where T : class
-//    {
-//        response.Error = error;
-//        return response;
-//    }
-
-//}
+    //public static implicit operator T(Response<T> response) => response.Data;
+    //public static implicit operator string(Response<T> response) => response.Status.ToString();
+    //public static explicit operator Exception(Response<T> response) => response.Error;
+    //public static explicit operator int(Response<T> response) => response.StatusCode;
