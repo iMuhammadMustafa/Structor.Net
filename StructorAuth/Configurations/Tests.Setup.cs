@@ -9,7 +9,7 @@ namespace Structor.Auth.Config;
 public class DependencySetupFixture : IDisposable
 {
     //private readonly string ConfigurationPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Config";
-    public IConfigurationRoot Configuration { get; set; }
+    //public IConfigurationRoot Configuration { get; set; }
     public ServiceProvider ServiceProvider { get; private set; }
     public ServiceCollection ServiceCollection { get; private set; }
     public IServiceScope ServiceScope { get; private set; }
@@ -33,8 +33,8 @@ public class DependencySetupFixture : IDisposable
             },
             Durations = new()
             {
-                Access = "30",
-                Refresh = "7"
+                Access = 30,
+                Refresh = 7
             },
             ValidateIssuer = true,
             ValidateAudience = true,

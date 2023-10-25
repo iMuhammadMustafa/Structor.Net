@@ -50,7 +50,7 @@ public class JWTService : IJWTService
     public string GenerateJWToken(Dictionary<string, string> _claims)
     {
         var accessClaims = GenerateClaims(_claims);
-        return GenerateToken(accessClaims, JWTEnum.Access),;
+        return GenerateToken(accessClaims, JWTEnum.Access);
     }
     public JwtDto GenerateJWTokens(Dictionary<string, string> _claims, Dictionary<string, string>? _refreshClaims = null)
     {

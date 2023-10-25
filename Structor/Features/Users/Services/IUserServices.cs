@@ -1,16 +1,17 @@
 ﻿using Structor.Auth.DTOs;
-using Structor.Infrastructure.DTOs.REST;
+using Structor.Features.Users.Dtos;
 using System.Net;
 
 namespace Structor.Features.Users.Services
 {
     public interface IUserServices
     {
-        Cookie CreateAccessCookie(JwtDto jwt);
-        Cookie CreateRefreshCookie(JwtDto jwt);
+        //Cookie CreateAccessCookie(JwtDto jwt);
+        CookieOptions CreateRefreshTokenCookieOptions(JwtDto jwt);
+        Task<JwtDto> ValidateAndGenerateNewToken(string userId, string refreshToken);
         string GetProviderRedirect(string provider);
-        Task<Response<JwtDto>> HandleExternal(string provider, string code, string state);
-        Task<Response<JwtDto>> Login(string email, string password);
-        Task<Response<JwtDto>> Register(NewUserDto newUser);
+        Task<JwtDto> HandleExternal(string provider, string code, string state);
+        Task<JwtDto> Login(LoginDto loginDto);
+        Task<JwtDto> Register(NewUserDto newUser);
     }
 }

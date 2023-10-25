@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Structor.Core.Exceptions;
 using Structor.Infrastructure.DTOs.REST;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -42,6 +43,12 @@ public class GlobalExceptionsMiddleware
 
         switch (ex)
         {
+            case HttpException httpException:
+                {
+                    errorObj.WithStatusCode(httpException.StatusCode);
+                    break;
+                }
+
             case BadHttpRequestException badHttpRequestException:
                 {
                     //errorObj.WithError(ex, 400);

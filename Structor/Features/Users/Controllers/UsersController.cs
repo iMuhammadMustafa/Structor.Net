@@ -1,5 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Structor.Auth.Configurations;
 using Structor.Auth.DTOs;
+using Structor.Features.Users.Dtos;
+using Structor.Features.Users.Entities;
 using Structor.Features.Users.Services;
 using Structor.Infrastructure.DTOs.REST;
 
@@ -12,36 +18,58 @@ public class UsersController : ControllerBase
 {
     private readonly IUserServices _usersServices;
     private readonly IConfiguration _configuration;
+    private readonly JwtOptions _jwtOptions;
 
-    public UsersController(IUserServices usersServices, IConfiguration configuration)
+    public UsersController(IUserServices usersServices, IConfiguration configuration, IOptions<JwtOptions> jwtOptions)
     {
         _usersServices = usersServices;
         _configuration = configuration;
+        _jwtOptions = jwtOptions.Value;
     }
 
     [HttpPost]
     public async Task<ActionResult<Response<JwtDto>>> Register(NewUserDto newUser)
     {
 
-        var jwtResponse = await _usersServices.Register(newUser);
+        var jwt = await _usersServices.Register(newUser);
 
-        return CreatedAtAction(nameof(Login), jwtResponse);
+        var response = new Response<JwtDto>().WithData(jwt, StatusCodes.Status201Created);
+
+        return CreatedAtAction(nameof(Login), response);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Response<JwtDto>>> Login([FromBody] string username, string Password)
+    public async Task<ActionResult<Response<JwtDto>>> Login([FromBody] LoginDto loginDto)
     {
-        var jwtResponse = await _usersServices.Login(username, Password);
+        var jwt = await _usersServices.Login(loginDto);
+        var response = new Response<JwtDto>().WithData(jwt, StatusCodes.Status200OK);
 
-        return Ok(jwtResponse);
+        var cookieOptions = _usersServices.CreateRefreshTokenCookieOptions(jwt);
+
+        Response.Cookies.Append(_jwtOptions.CookieHeaders.RefreshHeader, jwt.RefreshToken, cookieOptions);
+        return Ok(response);
     }
 
-    //[HttpPost]
-    //public async Task<IActionResult> ValidateToken([FromForm] string token, [FromForm] JWTEnum jWTEnum)
-    //{
+    [HttpGet]
+    [Authorize]
+    public async Task<ActionResult<Response<JwtDto>>> Refresh()
+    {
+        var refreshCookie = Request.Cookies.FirstOrDefault(c => c.Key == _jwtOptions.CookieHeaders.RefreshHeader);
+        var userId = HttpContext.User.Claims.FirstOrDefault(x => x.Type.Equals("UserId",StringComparison.OrdinalIgnoreCase));
 
-    //    return Ok(_jWTService.ValidateToken(token, jWTEnum));
-    //}
+        if (string.IsNullOrWhiteSpace(refreshCookie.Value))
+        {
+            return Unauthorized(new Response<JwtDto>().WithError("Refresh Token invalid or expired.", StatusCodes.Status401Unauthorized));
+        }
+
+        var jwt = await _usersServices.ValidateAndGenerateNewToken(userId.Value, refreshCookie.Value);
+
+        var cookieOptions = _usersServices.CreateRefreshTokenCookieOptions(jwt);
+        Response.Cookies.Append(_jwtOptions.CookieHeaders.RefreshHeader, jwt.RefreshToken, cookieOptions);
+        
+
+        return Ok(new Response<JwtDto>().WithData(jwt));
+    }
 
     /// <summary>
     /// Redirects user to the OAuth provider's login page to initiate the authentication flow.
@@ -63,11 +91,17 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{provider}")]
+    [Route("{provider}/")]
     public async Task<ActionResult<Response<JwtDto>>> CallBack([FromRoute] string provider, [FromQuery] string code, [FromQuery] string state)
     {
-        var jwtResponse = await _usersServices.HandleExternal(provider, code, state);
-        return CreatedAtAction(nameof(Login), jwtResponse);
+        var jwt = await _usersServices.HandleExternal(provider, code, state);
+
+        var cookieOptions = _usersServices.CreateRefreshTokenCookieOptions(jwt);
+        Response.Cookies.Append(_jwtOptions.CookieHeaders.RefreshHeader, jwt.RefreshToken, cookieOptions);
+
+        var response = new Response<JwtDto>().WithData(jwt, StatusCodes.Status200OK);
+
+        return CreatedAtAction(nameof(Login), response);
     }
 
 
@@ -80,7 +114,7 @@ public class UsersController : ControllerBase
 
     //    var tokens = await _usersServices.HandleExternal(provider, code, state);
     //    var accessCookie = _usersServices.CreateAccessCookie(tokens);
-    //    var refreshCookie = _usersServices.CreateRefreshCookie(tokens);
+    //    var refreshCookie = _usersServices.CreateRefreshHttpOnlyOptions(tokens);
 
 
 

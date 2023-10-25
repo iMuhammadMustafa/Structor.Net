@@ -66,9 +66,12 @@ public static class StructorAuthServicesCollection
             //Read AccessToken From Cookie 
             if (!string.IsNullOrWhiteSpace(jwtOptions.CookieHeaders?.AccessHeader))
             {
-                options.Events.OnMessageReceived = context =>
+                options.Events.OnMessageReceived = (context) =>
                 {
-                    context.Token = context.Request.Cookies[jwtOptions.CookieHeaders.AccessHeader];
+                    if (!string.IsNullOrWhiteSpace(context.Request.Cookies[jwtOptions.CookieHeaders.AccessHeader]))
+                    {
+                        context.Token = context.Request.Cookies[jwtOptions.CookieHeaders.AccessHeader];
+                    }
                     return Task.CompletedTask;
                 };
             }

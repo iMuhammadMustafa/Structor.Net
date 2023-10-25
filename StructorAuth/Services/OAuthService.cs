@@ -13,6 +13,7 @@ namespace Structor.Auth.Services;
 public interface IOAuthService
 {
     string GetProviderRedirect(string providerString);
+    OAuthProvider GetProviderEnum(string provider);
     Task<JsonNode> HandleProviderCallback(string providerString, string code, string state);
 }
 
@@ -83,7 +84,7 @@ public class OAuthService : IOAuthService
     }
 
 
-    private OAuthProvider GetProviderEnum(string provider)
+    public OAuthProvider GetProviderEnum(string provider)
     {
         if (!Enum.TryParse(provider, ignoreCase: true, out OAuthProvider oAuthProvider))
         {

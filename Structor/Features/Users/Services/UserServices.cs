@@ -3,12 +3,12 @@ using Structor.Features.Users.Entities;
 using Structor.Features.Users.Repositories;
 using Structor.Auth.Helpers;
 using Structor.Auth.Services;
-using System.Net;
 using Microsoft.Extensions.Options;
 using Structor.Auth.Configurations;
 using Structor.Auth.Enums;
-using System.IdentityModel.Tokens.Jwt;
-using Structor.Infrastructure.DTOs.REST;
+using Structor.Core.Exceptions;
+using Structor.Features.Users.Dtos;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Structor.Features.Users.Services;
 
@@ -30,14 +30,9 @@ public class UserServices : IUserServices
         _logger = logger;
         _Jwtoptions = jwtOptions.Value;
     }
-    public async Task<Response<JwtDto>> Register(NewUserDto newUser)
+    public async Task<JwtDto> Register(NewUserDto newUser)
     {
-        var validateEmailAndUsernameResult = await ValidateEmailAndUsername(newUser.Email, newUser.Username);
-
-        if (validateEmailAndUsernameResult != null)
-        {
-            return validateEmailAndUsernameResult;
-        }
+        await CheckAndThrowIfUserExists(newUser);
 
 
         var hashedPassword = newUser.Password.HashString();
@@ -55,36 +50,22 @@ public class UserServices : IUserServices
 
         var jwt = GenerateTokens(user, refreshToken);
 
-        return new Response<JwtDto>().WithData(jwt, StatusCodes.Status201Created);
+        return jwt;
 
     }
-    public async Task<Response<JwtDto>> Login(string email, string password)
+    public async Task<JwtDto> Login(LoginDto loginDto)
     {
-        var dbUser = await _userRepository.GetByEmailOrUsername(email);
-
-        if (dbUser == null)
-        {
-            return new Response<JwtDto>().WithError("Username or password is incorrect", StatusCodes.Status401Unauthorized);
-        }
-
-        var isMatch = password.DoesMatchHash(dbUser.PasswordHash ?? "");
-
-        if (!isMatch)
-        {
-            return new Response<JwtDto>().WithError("Username or password is incorrect", StatusCodes.Status401Unauthorized);
-        }
+        User dbUser = await ValidateUserCredentials(loginDto);
 
         var newRefresh = AuthenticationUtils.GenerateRandomRefresh();
 
-        dbUser.RefreshToken = newRefresh.HashString();
-        dbUser.RefreshExpiry = DateTime.UtcNow.AddDays(_Jwtoptions.Durations.Refresh);
-        dbUser.UpdatedBy = "System";
-        dbUser.UpdatedDate = DateTime.UtcNow;
+        UpdateUserRefreshToken(dbUser, newRefresh);
 
         await _userRepository.Update(dbUser, true);
-        return new Response<JwtDto>().WithData(GenerateTokens(dbUser, newRefresh), StatusCodes.Status200OK);
+        return GenerateTokens(dbUser, newRefresh);
     }
-    public async Task<Response<JwtDto>> HandleExternal(string provider, string code, string state)
+
+    public async Task<JwtDto> HandleExternal(string provider, string code, string state)
     {
         /*
          * 1. Get Access Token using code
@@ -95,15 +76,15 @@ public class UserServices : IUserServices
          * 6. Redirect to frontend return URI
          */
 
-        var userData = await _oAuthService.HandleProviderCallback(provider, code, state);
-        var providerParsed = Enum.TryParse(provider, out OAuthProvider providerEnum);
+        var userData = await _oAuthService.HandleProviderCallback(provider, code, state) ?? throw new HttpException("Failed to verify OAuth", StatusCodes.Status401Unauthorized);
+        var providerParsed = _oAuthService.GetProviderEnum(provider);
         var refreshToken = AuthenticationUtils.GenerateRandomRefresh();
 
         User newUser = new()
         {
             Email = userData?["email"]?.GetValue<string>() ?? string.Empty,
             Username = userData?["login"]?.GetValue<string>() ?? string.Empty,
-            Provider = providerParsed ? providerEnum : OAuthProvider.Local,
+            Provider = providerParsed,
             RefreshToken = refreshToken.HashString(),
             RefreshExpiry = DateTime.UtcNow.AddDays(_Jwtoptions.Durations.Refresh)
         };
@@ -117,83 +98,106 @@ public class UserServices : IUserServices
         }
         else
         {
-            user.RefreshToken = refreshToken.HashString();
-            user.RefreshExpiry = DateTime.UtcNow.AddDays(_Jwtoptions.Durations.Refresh);
+            UpdateUserRefreshToken(user, refreshToken);
             await _userRepository.Update(user, true);
         }
 
         var jwt = GenerateTokens(user, refreshToken);
-        return new Response<JwtDto>().WithData(jwt, StatusCodes.Status201Created);
+        return jwt;
     }
-    public Cookie CreateRefreshCookie(JwtDto jwt)
+
+    public async Task<JwtDto> ValidateAndGenerateNewToken(string userId, string refreshToken)
     {
-        var cookie = new Cookie(_Jwtoptions.CookieHeaders.RefreshHeader, jwt.RefreshToken)
+        var user = await _userRepository.GetByGuid(Guid.Parse(userId));
+
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("User does not exist");
+        }
+        if (string.IsNullOrWhiteSpace(user.RefreshToken) || !refreshToken.DoesMatchHash(user.RefreshToken) || user.RefreshExpiry <= DateTime.UtcNow)
+        {
+            throw new UnauthorizedAccessException("Refresh Token is not valid");
+        }
+
+        var newRefreshToken = AuthenticationUtils.GenerateRandomRefresh();
+
+        UpdateUserRefreshToken(user, newRefreshToken);
+        await _userRepository.Update(user, true);
+
+        return GenerateTokens(user, refreshToken);
+    }
+
+    public CookieOptions CreateRefreshTokenCookieOptions(JwtDto jwt)
+    {
+        var cookie = new CookieOptions()
         {
             HttpOnly = true,
             Secure = true,
             Expires = DateTime.Now.AddDays(_Jwtoptions.Durations.Refresh),
         };
-
         return cookie;
     }
-    public Cookie CreateAccessCookie(JwtDto jwt)
-    {
-        var address = Dns.GetHostAddresses(Dns.GetHostName())
-                 .FirstOrDefault(addr => !IPAddress.IsLoopback(addr));
-        var cookie = new Cookie(_Jwtoptions.CookieHeaders.AccessHeader, jwt.AccessToken)
-        {
-            Path = address?.ToString() ?? "localhost",
-            HttpOnly = true,
-            Secure = true,
-            Expires = DateTime.Now.AddDays(_Jwtoptions.Durations.Access),
-        };
+    //public Cookie CreateAccessCookie(JwtDto jwt)
+    //{
+    //    var address = Dns.GetHostAddresses(Dns.GetHostName())
+    //             .FirstOrDefault(addr => !IPAddress.IsLoopback(addr));
+    //    var cookie = new Cookie(_Jwtoptions.CookieHeaders.AccessHeader, jwt.AccessToken)
+    //    {
+    //        Path = address?.ToString() ?? "localhost",
+    //        HttpOnly = true,
+    //        Secure = true,
+    //        Expires = DateTime.Now.AddDays(_Jwtoptions.Durations.Access),
+    //    };
 
-        return cookie;
-    }
-
+    //    return cookie;
+    //}
     public string GetProviderRedirect(string provider)
     {
         return _oAuthService.GetProviderRedirect(provider);
     }
-
-    private async Task<Response<JwtDto>?> CheckEmailExistance(string email)
+    private async Task CheckAndThrowIfUserExists(NewUserDto newUser)
     {
-        var doesEmailExists = await _userRepository.DoesEmailExists(email);
-        if (!doesEmailExists)
-        {
-            return new Response<JwtDto>().WithError("Email already exists", StatusCodes.Status409Conflict);
-        }
+        await ThrowIfEmailExists(newUser.Email);
 
-        return null;
+        if (!string.IsNullOrWhiteSpace(newUser.Username))
+        {
+            await ThrowIfUsernameExists(newUser.Username);
+        }
     }
-    private async Task<Response<JwtDto>?> CheckUsernameExistance(string username)
+    private async Task ThrowIfEmailExists(string email)
     {
-        var doesEmailExists = await _userRepository.DoesUsernameExist(username);
-        if (!doesEmailExists)
+        var emailExists = await _userRepository.EmailExists(email);
+        if (emailExists)
         {
-            return new Response<JwtDto>().WithError("Username already exists", StatusCodes.Status409Conflict);
+            throw new HttpException("Email already exists", StatusCodes.Status409Conflict);
         }
-
-        return null;
     }
-    private async Task<Response<JwtDto>?> ValidateEmailAndUsername(string email, string? username = null)
+    private async Task ThrowIfUsernameExists(string username)
     {
-        var emailExists = await CheckEmailExistance(email);
-        if (emailExists != null)
+        var usernameExists = await _userRepository.UsernameExists(username);
+        if (usernameExists)
         {
-            return emailExists;
+            throw new HttpException("Username already exists", StatusCodes.Status409Conflict);
         }
 
-        if (!string.IsNullOrWhiteSpace(username))
+    }
+    private async Task<User> ValidateUserCredentials(LoginDto loginDto)
+    {
+        var dbUser = await _userRepository.GetByEmailOrUsername(loginDto.UsernameOrEmail);
+
+        if (dbUser == null)
         {
-            var usernameExists = await CheckUsernameExistance(username);
-            if (emailExists != null)
-            {
-                return emailExists;
-            }
+            throw new HttpException("Username or password is incorrect", StatusCodes.Status401Unauthorized);
         }
 
-        return null;
+        var isMatch = loginDto.Password.DoesMatchHash(dbUser.PasswordHash ?? "");
+
+        if (!isMatch)
+        {
+            throw new HttpException("Username or password is incorrect", StatusCodes.Status401Unauthorized);
+        }
+
+        return dbUser;
     }
     private JwtDto GenerateTokens(User user, string? refreshToken = null)
     {
@@ -210,12 +214,20 @@ public class UserServices : IUserServices
     private Dictionary<string, string> GenerateClaims(User user)
     {
         var claims = new Dictionary<string, string>();
-        claims.Add(JwtRegisteredClaimNames.Sub, user.Guid.ToString());
-        claims.Add(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString());
-        claims.Add(JwtRegisteredClaimNames.Iat, DateTime.Now.ToUniversalTime().ToString());
+        //claims.Add(JwtRegisteredClaimNames.Sub, user.Guid.ToString());
+        //claims.Add(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString());
+        //claims.Add(JwtRegisteredClaimNames.Iat, DateTime.Now.ToUniversalTime().ToString());
+        claims.Add("UserId", user.Guid.ToString());
+        claims.Add(JwtRegisteredClaimNames.Name, user.Guid.ToString());
+        claims.Add(JwtRegisteredClaimNames.Email, user.Email);
         claims.Add("Email", user.Email);
-        claims.Add("Name", user.Name ?? "");
         return claims;
     }
-
+    private void UpdateUserRefreshToken(User user, string newRefresh)
+    {
+        user.RefreshToken = newRefresh.HashString();
+        user.RefreshExpiry = DateTime.UtcNow.AddDays(_Jwtoptions.Durations.Refresh);
+        user.UpdatedBy = "System";
+        user.UpdatedDate = DateTime.UtcNow;
+    }
 }

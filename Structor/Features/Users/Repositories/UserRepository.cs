@@ -1,4 +1,5 @@
 ﻿using Infrastructure.DatabaseContext;
+using Microsoft.EntityFrameworkCore;
 using Structor.Features.Users.Entities;
 using Structor.Infrastructure.Repositories;
 
@@ -13,23 +14,20 @@ public class UserRepository : Repository<User, CoreDbContext>, IUserRepository
     }
 
 
-    public async Task<bool> DoesUsernameExist(string username)
+    public async Task<bool> UsernameExists(string username)
     {
-        var user = await FindFirst(x=> x.Username == username);
-
-        return user != null;
+        return await DbSet.AnyAsync(x => x.Username == username);
     }
-    public async Task<bool> DoesEmailExists(string email)
+    public async Task<bool> EmailExists(string email)
     {
-        var user = await FindFirst(x => x.Email == email);
 
-        return user != null;
+        return await DbSet.AnyAsync(x => x.Email == email);
     }
 
-    public async Task<User?> GetByEmailOrUsername(string loginBy)
+    public async Task<User?> GetByEmailOrUsername(string usernameOrEmail)
     {
-        return await FindFirst(x => x.Email.Equals(loginBy, StringComparison.OrdinalIgnoreCase) 
-                                 || string.IsNullOrWhiteSpace(x.Username) && x.Username!.Equals(loginBy, StringComparison.OrdinalIgnoreCase));
+        return await FindFirst(x => x.Email.Equals(usernameOrEmail) 
+                                 || (string.IsNullOrWhiteSpace(x.Username) && x.Username!.Equals(usernameOrEmail)));
 
     }
 
