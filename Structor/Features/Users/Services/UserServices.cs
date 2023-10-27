@@ -9,6 +9,7 @@ using Structor.Auth.Enums;
 using Structor.Core.Exceptions;
 using Structor.Features.Users.Dtos;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Structor.Features.Enums;
 
 namespace Structor.Features.Users.Services;
 
@@ -217,10 +218,11 @@ public class UserServices : IUserServices
         //claims.Add(JwtRegisteredClaimNames.Sub, user.Guid.ToString());
         //claims.Add(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString());
         //claims.Add(JwtRegisteredClaimNames.Iat, DateTime.Now.ToUniversalTime().ToString());
-        claims.Add("UserId", user.Guid.ToString());
-        claims.Add(JwtRegisteredClaimNames.Name, user.Guid.ToString());
-        claims.Add(JwtRegisteredClaimNames.Email, user.Email);
-        claims.Add("Email", user.Email);
+        claims.Add(UserClaim.Id, user.Id.ToString());
+        claims.Add(UserClaim.Guid, user.Guid.ToString());
+        claims.Add(UserClaim.Name, user.Name ?? "");
+        claims.Add(UserClaim.Username, user.Username ?? "");
+        claims.Add(UserClaim.Email, user.Email);
         return claims;
     }
     private void UpdateUserRefreshToken(User user, string newRefresh)

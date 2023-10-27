@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Structor.Auth.Configurations;
 using Structor.Auth.DTOs;
+using Structor.Features.Enums;
 using Structor.Features.Users.Dtos;
-using Structor.Features.Users.Entities;
 using Structor.Features.Users.Services;
 using Structor.Infrastructure.DTOs.REST;
 
@@ -55,7 +55,7 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<Response<JwtDto>>> Refresh()
     {
         var refreshCookie = Request.Cookies.FirstOrDefault(c => c.Key == _jwtOptions.CookieHeaders.RefreshHeader);
-        var userId = HttpContext.User.Claims.FirstOrDefault(x => x.Type.Equals("UserId",StringComparison.OrdinalIgnoreCase));
+        var userId = HttpContext.User.Claims.FirstOrDefault(x => x.Type.Equals(UserClaim.Guid,StringComparison.OrdinalIgnoreCase));
 
         if (string.IsNullOrWhiteSpace(refreshCookie.Value))
         {
